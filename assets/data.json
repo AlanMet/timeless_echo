@@ -1,0 +1,83 @@
+{
+    "rooms":[
+        {
+            "id":1,
+            "type":"tutorial room",
+            "name":"An oddly small room",
+            "description":"You are in a small room. There is a steel sword leaning against the wall.\n\nThere is a door to the north.",
+            "description2": "You are in a small room.\n\nThere is a door to the north.",
+            "instructions": [
+                "Take the sword. using 'take sword' ",
+                "take sword",
+                "Great! now check your inventory.\nThere are various shortcuts available such as 'i', 'inv'", "inventory",
+                "Now go north. You can type 'n', 'north' or 'go north' to move to the next room.",
+                "go north"
+            ],
+            "objects": ["Steel Sword"],
+            "exits":[2, -1, -1, -1, -1, -1]
+        },
+        {
+            "id":2,
+            "type":"tutorial room",
+            "name":"Large room",
+            "description":"You are now in a large room with a wooden door to the east.",
+            "instructions": [
+                "use describe to get a description of the room",
+                "describe",
+                "A fierce beast is ahead, fight it!",
+                "thankfully you made it.",
+                "go east"
+            ],
+            "objects": ["Fierce Beast"],
+            "exits":[-1, -1, 3, -1, -1, -1]
+        },
+        {
+            "id":3,
+            "type":"tutorial room",
+            "name":"kitchen",
+            "description":"You are now in a kitchen, there is a closed cabinet in the corner of the room.",
+            "instructions": [
+                "open the cabinet",
+                "open cabinet",
+                "nice, you found some food",
+                "take bread",
+                "Now eat it",
+                "eat bread",
+                "Great!, you can heal with various items around the map. \nGo south.",
+                "go south"
+            ],
+            "objects": [
+                "tutorial cabinet"
+            ],
+            "exits":[-1, -1, -1, 2, -1, -1]
+        }
+    ],
+    "objects":[
+        {
+            "steel sword": {
+                "type" : "weapon",
+                "description": "A sharp steel sword. It looks like it can do some damage.",
+                "damage": 10
+            },
+            "Fierce Beast" :{
+                "type": "enemy",
+                "description": "A fierce beast with sharp claws and teeth. It looks like it is ready to attack.",
+                "health": 100
+            },
+            "tutorial cabinet": {
+                "type": "container",
+                "takeable": false,
+                "description": "A closed cabinet. It looks like it can be opened.",
+                "items": [
+                    {
+                        "bread" : {
+                            "type": "food",
+                            "description": "A loaf of bread. It's moldy but it should be fine.",
+                            "health": 100
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

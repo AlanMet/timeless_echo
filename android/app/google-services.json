@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1086444158358",
+    "firebase_url": "https://timeless-echo-9dfa9-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "timeless-echo-9dfa9",
+    "storage_bucket": "timeless-echo-9dfa9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086444158358:android:7daa118f2705b3bee8b1b7",
+        "android_client_info": {
+          "package_name": "com.mayu.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvnITuhCq3jbmo8XXqEh0n9se4j1ZUhzw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
