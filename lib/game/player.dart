@@ -1,5 +1,5 @@
 import 'inventory.dart';
-import '\\notifier.dart';
+import 'package:timeless_echo/notifier.dart';
 
 class Player {
   late int health = 90;

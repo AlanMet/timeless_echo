@@ -6,6 +6,7 @@ import 'package:timeless_echo/notifier.dart';
 import 'dart:convert';
 import 'item.dart';
 import 'helpers.dart';
+import 'interactibles.dart';
 
 class Atlas {
   Map<int, Room> _rooms = {};
@@ -17,7 +18,7 @@ class Atlas {
     return _rooms[_currentRoom]!;
   }
 
-  Future<Map<int, Room>> loadRooms() async {
+  Future<Map<int, Room>> loadRooms(Map<int, dynamic> objects) async {
     print('Loading rooms...');
     DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('rooms');
     Map<int, Room> loadedRooms = {};
@@ -37,41 +38,44 @@ class Atlas {
       String name = roomdata['name'];
       String description = roomdata['description'];
       List<int> exits = roomdata['exits'].cast<int>();
-
       switch (roomtype) {
         case 'room':
-          print('room');
           Room room = Room.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         case 'interactable':
-          print('interactable');
           InteractableRoom room =
               InteractableRoom.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         case 'tutorial room':
-          print('tutorial room');
           Tutorial room = Tutorial.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         default:
           print('Invalid room type');
       }
-      print("Room $i/${data.length} loaded");
+
+      if (roomdata.containsKey('objects')) {
+        //gets all item IDs in the room
+        List<int> itemids = roomdata['objects'].cast<int>();
+        for (var itemid in itemids) {
+          if (objects.containsKey(itemid)) {
+            loadedRooms[i]!.addItem(objects[itemid]);
+            print('Added ${objects[itemid].name} to room $i');
+          }
+        }
+      }
     }
     _rooms = loadedRooms;
-    print('Rooms loaded');
     return _rooms;
   }
 
-  Future<Map<String, Item>> loadItems() async {
+  Future<Map<int, dynamic>> loadItems() async {
     print('Loading items...');
     DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('objects');
-    Map<String, Item> loadedItems = {};
+    //dynamic because while item is the superclass, interactables are also loaded here.
+    Map<int, dynamic> loadedItems = {};
 
     var data;
 
@@ -84,25 +88,41 @@ class Atlas {
     }
 
     for (var i = 0; i < data.length; i++) {
+      print("Loading item $i/${data.length}");
       var itemData = data[i];
-      print(itemData);
-      String roomtype = itemData['type'];
-      String name = itemData['name'];
-      String description = itemData['description'];
-      print(itemData['synonyms']);
-      List<String> synonyms = itemData['synonyms'].cast<String>();
-      print('Synonyms: $synonyms');
+      //only loading type at this stage bnecause storage isn't consistent
+      //(firebase removes empty entries so consistency is not possible)
+      String itemtype = itemData['type'];
 
-      switch (roomtype) {
+      switch (itemtype) {
         case 'item':
-          Item item = Item(name, description, synonyms);
-          loadedItems[item.name] = item;
-          print('Item loaded: ${item.name}');
+          String name = itemData['name'];
+          String description = itemData['description'];
+          Item item = Item(name, description);
+          //synonyms might not exist because firebase removes empty entries
+          if (itemData.containsKey('synonyms')) {}
+          loadedItems[i] = item;
+          break;
+        case 'locked door':
+          print('Loading locked door');
+          break;
+        case 'container':
+          print('Loading container');
+          break;
+        case 'weapon':
+          String name = itemData['name'];
+          String description = itemData['description'];
+          int damage = itemData['damage'];
+          Weapon weapon = Weapon(name, description, damage);
+          loadedItems[i] = weapon;
           break;
         default:
-          print('Invalid item type');
+          print('Invalid item type: $itemtype');
+          break;
       }
+      print("Done.");
     }
+    print("Done.");
 
     return loadedItems;
   }

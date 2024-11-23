@@ -23,9 +23,9 @@ class Game {
     print("Loading data...");
     await loadDictionary();
 
-    await map.loadRooms();
-    await map.loadItems();
-    //await map.fillRooms();
+    //items loaded first so rooms can be filled with items straight away.
+    Map<int, dynamic> items = await map.loadItems();
+    await map.loadRooms(items);
     Room currentRoom = map.getCurrentRoom();
     print("current room: ${currentRoom.name}");
     _controller.updateText("${currentRoom.name}\n${currentRoom.description}");

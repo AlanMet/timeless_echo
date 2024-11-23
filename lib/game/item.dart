@@ -1,11 +1,11 @@
 class Item {
   late final String _name;
   late final String _description;
-  late final List<String> _synonyms;
+  List<String> _synonyms = [];
   late bool _takeable;
   late String _rejectionMessage;
 
-  Item(this._name, this._description, this._synonyms) : _takeable = true;
+  Item(this._name, this._description) : _takeable = true;
   Item.untakable(
       this._name, this._description, this._synonyms, this._rejectionMessage)
       : _takeable = false;
@@ -17,6 +17,10 @@ class Item {
 
   void addSynonym(String synonym) {
     _synonyms.add(synonym);
+  }
+
+  void addSynonyms(List<String> synonyms) {
+    _synonyms.addAll(synonyms);
   }
 
   String getTakeDialogue() {
@@ -34,4 +38,13 @@ class Item {
   bool isSynonym(String word) {
     return _synonyms.contains(word) || _name == word;
   }
+}
+
+class Weapon extends Item {
+  late final int _damage;
+
+  Weapon(String name, String description, this._damage)
+      : super(name, description);
+
+  int get damage => _damage;
 }

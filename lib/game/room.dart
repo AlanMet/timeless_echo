@@ -64,6 +64,26 @@ class Room {
     }
   }
 
+  void addItems(List<Item> items) {
+    _items.addAll(items);
+  }
+
+  void addItem(Item item) {
+    _items.add(item);
+  }
+
+  dynamic removeItem(String itemName) {
+    if (itemName == "all") {
+      return takeAll();
+    }
+  }
+
+  List<Item> takeAll() {
+    var temp = _items;
+    _items = [];
+    return temp;
+  }
+
   List<int> getExits() {
     return _exits;
   }
@@ -91,16 +111,5 @@ class Tutorial extends InteractableRoom {
   }
 
   Tutorial.withExits(int id, String name, String description, List<int> exits)
-      : super.withExits(id, name, description, exits);
-}
-
-class BattleRoom extends InteractableRoom {
-  late List<Enemy> _enemies;
-
-  BattleRoom(super.id, super.name, super.description) {
-    _enemies = [];
-  }
-
-  BattleRoom.withExits(int id, String name, String description, List<int> exits)
       : super.withExits(id, name, description, exits);
 }
