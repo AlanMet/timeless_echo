@@ -93,3 +93,14 @@ class Tutorial extends InteractableRoom {
   Tutorial.withExits(int id, String name, String description, List<int> exits)
       : super.withExits(id, name, description, exits);
 }
+
+class BattleRoom extends InteractableRoom {
+  late List<Enemy> _enemies;
+
+  BattleRoom(super.id, super.name, super.description) {
+    _enemies = [];
+  }
+
+  BattleRoom.withExits(int id, String name, String description, List<int> exits)
+      : super.withExits(id, name, description, exits);
+}

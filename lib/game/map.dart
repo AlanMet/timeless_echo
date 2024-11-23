@@ -59,8 +59,43 @@ class Atlas {
     return _rooms;
   }
 
-  List<Item> loadItems() {
-    return [];
+  Future<Map<String, Item>> loadItems() async {
+    print('Loading items...');
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('objects');
+    Map<String, Item> loadedItems = {};
+
+    var data;
+
+    try {
+      final snapshot = await dbRef.get();
+      data = snapshot.value;
+      print(data);
+    } catch (e) {
+      print('Error loading rooms from Firebase: $e');
+    }
+
+    for (var i = 0; i < data.length; i++) {
+      var itemData = data[i];
+      print(itemData);
+      String roomtype = itemData['type'];
+      String name = itemData['name'];
+      String description = itemData['description'];
+      print(itemData['synonyms']);
+      List<String> synonyms = itemData['synonyms'].cast<String>();
+      print('Synonyms: $synonyms');
+
+      switch (roomtype) {
+        case 'item':
+          Item item = Item(name, description, synonyms);
+          loadedItems[item.name] = item;
+          print('Item loaded: ${item.name}');
+          break;
+        default:
+          print('Invalid item type');
+      }
+    }
+
+    return loadedItems;
   }
 
   void fillRooms(List<Item> items) {}
