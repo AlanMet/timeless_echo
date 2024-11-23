@@ -35,6 +35,7 @@ class _TextInputState extends State<TextInput> {
           focusNode: _focusNode,
           onSubmitted: (value) {
             _processInput();
+            _focusNode.requestFocus();
           },
           decoration: InputDecoration(
             hintText: 'Enter command',
@@ -45,6 +46,7 @@ class _TextInputState extends State<TextInput> {
               icon: const Icon(Icons.send),
               onPressed: () {
                 _processInput();
+                _focusNode.requestFocus();
               },
             ),
           ),

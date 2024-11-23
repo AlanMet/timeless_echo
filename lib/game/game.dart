@@ -116,6 +116,7 @@ class Game {
 
   void runCommand(List<WordAndType> wordAndType) {
     print("Running command");
+    print(map.getCurrentRoom().id);
     Map<String, Function(List<WordAndType>)> commandMap = {
       '[WordType.verb]': processVerb,
       '[WordType.verb, WordType.noun]': processVerbNoun,

@@ -8,4 +8,11 @@ class Player {
 
   Controller controller = Controller();
   Inventory inventory = Inventory();
+
+  void takeDamage(int damage) {
+    health -= damage;
+    if (health <= 0) {
+      controller.gameOver();
+    }
+  }
 }
