@@ -9,6 +9,13 @@ class Controller extends ChangeNotifier {
   Controller._internal();
 
   late Game game;
+  String _text = 'Initializing...';
+  String get text => _text;
+  final CustomTheme _theme = CustomTheme();
+  CustomTheme get theme => _theme;
+
+  String menu = 'main';
+
   void setGame(Game game) {
     this.game = game;
   }
@@ -16,10 +23,6 @@ class Controller extends ChangeNotifier {
   factory Controller() {
     return _instance; // always returns the same insance
   }
-
-  String _text = 'Initializing...';
-  String get text => _text;
-
   void updateText(String text) {
     _text = parseText(text);
     notifyListeners(); // Notify listeners immediately
@@ -31,11 +34,12 @@ class Controller extends ChangeNotifier {
     return text.replaceAll(r'\n', '\n');
   }
 
-  final CustomTheme _theme = CustomTheme();
-  CustomTheme get theme => _theme;
-
   void toggleTheme([bool? isDark]) {
     theme.toggleTheme(isDark);
     notifyListeners();
+  }
+
+  void gameOver() {
+    menu = 'Game Over';
   }
 }

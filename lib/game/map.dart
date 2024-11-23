@@ -32,6 +32,7 @@ class Atlas {
 
     for (var i = 0; i < data.length; i++) {
       var roomdata = data[i];
+      //print(roomdata);
       String roomtype = roomdata['type'];
       String name = roomdata['name'];
       String description = roomdata['description'];
@@ -39,23 +40,31 @@ class Atlas {
 
       switch (roomtype) {
         case 'room':
+          print('room');
           Room room = Room.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
+          print("done.");
           break;
         case 'interactable':
+          print('interactable');
           InteractableRoom room =
               InteractableRoom.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
+          print("done.");
           break;
-        case 'tutorial':
+        case 'tutorial room':
+          print('tutorial room');
           Tutorial room = Tutorial.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
+          print("done.");
           break;
         default:
           print('Invalid room type');
       }
+      print("Room $i/${data.length} loaded");
     }
     _rooms = loadedRooms;
+    print('Rooms loaded');
     return _rooms;
   }
 
@@ -76,6 +85,8 @@ class Atlas {
       'southwest': 5,
       'west': 6,
       'northwest': 7,
+      'up': 8,
+      'down': 9,
     };
 
     int newIndex = -1;
@@ -115,9 +126,7 @@ class Atlas {
 //       'west': 6,
 //       'northwest': 7,
 //     };
-
 //     int newIndex = -1;
-
 //     if (directions.containsKey(direction)) {
 //       int directionIndex = directions[direction]!;
 //       int newindex = _rooms[_currentRoom]!.getExits()[directionIndex];
@@ -125,7 +134,6 @@ class Atlas {
 //     } else {
 //       return 'Invalid direction';
 //     }
-
 //     if (newIndex == -1) {
 //       return 'You cannot go that way';
 //     } else {

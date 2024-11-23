@@ -21,7 +21,7 @@ class Room {
 
   Room.withExits(this._id, this._name, this._description, List<int> exits) {
     _items = [];
-    if (exits.length == 8) {
+    if (exits.length == 10) {
       _exits = exits;
     } else {
       _exits = [-1, -1, -1, -1, -1, -1, -1, -1];
@@ -43,22 +43,22 @@ class Room {
       case Direction.west:
         _exits[3] = room;
         break;
-      case Direction.up:
+      case Direction.northEast:
         _exits[4] = room;
         break;
-      case Direction.down:
+      case Direction.northWest:
         _exits[5] = room;
         break;
-      case Direction.northEast:
+      case Direction.southEast:
         _exits[6] = room;
         break;
-      case Direction.northWest:
+      case Direction.southWest:
         _exits[7] = room;
         break;
-      case Direction.southEast:
+      case Direction.up:
         _exits[8] = room;
         break;
-      case Direction.southWest:
+      case Direction.down:
         _exits[9] = room;
         break;
     }

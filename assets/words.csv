@@ -6,6 +6,8 @@ lightmode,verb
 load,verb
 up,verb
 u,verb
+down, verb
+d, verb
 north,verb
 n,verb
 northeast,verb
