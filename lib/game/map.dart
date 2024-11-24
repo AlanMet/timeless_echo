@@ -6,6 +6,7 @@ import 'package:timeless_echo/notifier.dart';
 import 'dart:convert';
 import 'item.dart';
 import 'helpers.dart';
+import 'interactibles.dart';
 
 class Atlas {
   Map<int, Room> _rooms = {};
@@ -17,7 +18,7 @@ class Atlas {
     return _rooms[_currentRoom]!;
   }
 
-  Future<Map<int, Room>> loadRooms() async {
+  Future<Map<int, Room>> loadRooms(Map<int, dynamic> objects) async {
     print('Loading rooms...');
     DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('rooms');
     Map<int, Room> loadedRooms = {};
@@ -37,7 +38,6 @@ class Atlas {
       String name = roomdata['name'];
       String description = roomdata['description'];
       List<int> exits = roomdata['exits'].cast<int>();
-
       switch (roomtype) {
         case 'room':
           Room room = Room.withExits(i, name, description, exits);
@@ -55,15 +55,76 @@ class Atlas {
         default:
           print('Invalid room type');
       }
-      print("Room $i/${data.length} loaded");
+
+      if (roomdata.containsKey('objects')) {
+        //gets all item IDs in the room
+        List<int> itemids = roomdata['objects'].cast<int>();
+        for (var itemid in itemids) {
+          if (objects.containsKey(itemid)) {
+            loadedRooms[i]!.addItem(objects[itemid]);
+            print('Added ${objects[itemid].name} to room $i');
+          }
+        }
+      }
     }
     _rooms = loadedRooms;
-    print('Rooms loaded');
     return _rooms;
   }
 
-  List<Item> loadItems() {
-    return [];
+  Future<Map<int, dynamic>> loadItems() async {
+    print('Loading items...');
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('objects');
+    //dynamic because while item is the superclass, interactables are also loaded here.
+    Map<int, dynamic> loadedItems = {};
+
+    var data;
+
+    try {
+      final snapshot = await dbRef.get();
+      data = snapshot.value;
+      print(data);
+    } catch (e) {
+      print('Error loading rooms from Firebase: $e');
+    }
+
+    for (var i = 0; i < data.length; i++) {
+      print("Loading item $i/${data.length}");
+      var itemData = data[i];
+      //only loading type at this stage bnecause storage isn't consistent
+      //(firebase removes empty entries so consistency is not possible)
+      String itemtype = itemData['type'];
+
+      switch (itemtype) {
+        case 'item':
+          String name = itemData['name'];
+          String description = itemData['description'];
+          Item item = Item(name, description);
+          //synonyms might not exist because firebase removes empty entries
+          if (itemData.containsKey('synonyms')) {}
+          loadedItems[i] = item;
+          break;
+        case 'locked door':
+          print('Loading locked door');
+          break;
+        case 'container':
+          print('Loading container');
+          break;
+        case 'weapon':
+          String name = itemData['name'];
+          String description = itemData['description'];
+          int damage = itemData['damage'];
+          Weapon weapon = Weapon(name, description, damage);
+          loadedItems[i] = weapon;
+          break;
+        default:
+          print('Invalid item type: $itemtype');
+          break;
+      }
+      print("Done.");
+    }
+    print("Done.");
+
+    return loadedItems;
   }
 
   void fillRooms(List<Item> items) {}

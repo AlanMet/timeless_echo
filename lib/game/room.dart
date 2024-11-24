@@ -64,6 +64,26 @@ class Room {
     }
   }
 
+  void addItems(List<Item> items) {
+    _items.addAll(items);
+  }
+
+  void addItem(Item item) {
+    _items.add(item);
+  }
+
+  dynamic removeItem(String itemName) {
+    if (itemName == "all") {
+      return takeAll();
+    }
+  }
+
+  List<Item> takeAll() {
+    var temp = _items;
+    _items = [];
+    return temp;
+  }
+
   List<int> getExits() {
     return _exits;
   }

@@ -25,7 +25,9 @@ class Game {
     print("Loading data...");
     await loadDictionary();
 
-    await map.loadRooms();
+    //items loaded first so rooms can be filled with items straight away.
+    Map<int, dynamic> items = await map.loadItems();
+    await map.loadRooms(items);
     Room currentRoom = map.getCurrentRoom();
     print("current room: ${currentRoom.name}");
     _controller.updateText("${currentRoom.name}\n${currentRoom.description}");
@@ -129,10 +131,8 @@ class Game {
     };
     String commandTypes =
         wordAndType.map((word) => word.type.toString()).toList().toString();
-    print(commandTypes);
 
     if (commandMap.containsKey(commandTypes)) {
-      print(commandMap[commandTypes]);
       commandMap[commandTypes]!(wordAndType);
     } else {
       print("I beg your pardon?");
@@ -214,7 +214,6 @@ class Game {
   }
 
   void processVerbNoun(List<WordAndType> wordAndType) {
-    print("Processing verb and noun");
     WordAndType verb = wordAndType[0];
     WordAndType noun = wordAndType[1];
     switch (verb.word) {
