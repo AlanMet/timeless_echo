@@ -24,4 +24,16 @@ class Inventory {
   bool contains(Item item) {
     return _items.contains(item);
   }
+
+  @override
+  String toString() {
+    if (_items.isEmpty) {
+      return 'Inventory is empty';
+    }
+    String result = '';
+    for (var item in _items) {
+      result += item.name + '\n';
+    }
+    return result;
+  }
 }

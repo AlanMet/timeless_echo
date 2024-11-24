@@ -40,23 +40,17 @@ class Atlas {
 
       switch (roomtype) {
         case 'room':
-          print('room');
           Room room = Room.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         case 'interactable':
-          print('interactable');
           InteractableRoom room =
               InteractableRoom.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         case 'tutorial room':
-          print('tutorial room');
           Tutorial room = Tutorial.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
-          print("done.");
           break;
         default:
           print('Invalid room type');

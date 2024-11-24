@@ -11,6 +11,8 @@ class Controller extends ChangeNotifier {
   late Game game;
   String _text = 'Initializing...';
   String get text => _text;
+  List<String> _history = [];
+  List<String> get history => _history;
   final CustomTheme _theme = CustomTheme();
   CustomTheme get theme => _theme;
 
@@ -25,6 +27,7 @@ class Controller extends ChangeNotifier {
   }
   void updateText(String text) {
     _text = parseText(text);
+    _history.add(_text);
     notifyListeners(); // Notify listeners immediately
     print("Text updated to: $_text");
   }

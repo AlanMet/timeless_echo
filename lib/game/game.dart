@@ -5,6 +5,7 @@ import 'package:timeless_echo/notifier.dart';
 import 'helpers.dart';
 import 'word_and_type.dart';
 import 'room.dart';
+import 'player.dart';
 
 class Game {
   // Reference to the controller
@@ -12,6 +13,7 @@ class Game {
   // Map of words to their types
   Map<String, WordType> vocab = {};
   Atlas map = Atlas();
+  Player player = Player();
 
   Game(this._controller);
 
@@ -155,7 +157,7 @@ class Game {
       case "i":
       case "inv":
       case "inventory":
-        printscrn("You have: \n - A key");
+        printscrn(player.printInventory());
         break;
       case "describe":
       case "look":

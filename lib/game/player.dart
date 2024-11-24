@@ -15,4 +15,8 @@ class Player {
       controller.gameOver();
     }
   }
+
+  String printInventory() {
+    return inventory.toString();
+  }
 }
