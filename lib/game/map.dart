@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'item.dart';
 import 'helpers.dart';
 import 'interactibles.dart';
+import 'player.dart';
 
 class Atlas {
   Map<int, Room> _rooms = {};
@@ -92,33 +93,13 @@ class Atlas {
       var itemData = data[i];
       //only loading type at this stage bnecause storage isn't consistent
       //(firebase removes empty entries so consistency is not possible)
-      String itemtype = itemData['type'];
-
-      switch (itemtype) {
-        case 'item':
-          String name = itemData['name'];
-          String description = itemData['description'];
-          Item item = Item(name, description);
-          //synonyms might not exist because firebase removes empty entries
-          if (itemData.containsKey('synonyms')) {}
-          loadedItems[i] = item;
-          break;
-        case 'locked door':
-          print('Loading locked door');
-          break;
-        case 'container':
-          print('Loading container');
-          break;
-        case 'weapon':
-          String name = itemData['name'];
-          String description = itemData['description'];
-          int damage = itemData['damage'];
-          Weapon weapon = Weapon(name, description, damage);
-          loadedItems[i] = weapon;
-          break;
-        default:
-          print('Invalid item type: $itemtype');
-          break;
+      dynamic item = await createItem(itemData);
+      if (item != null) {
+        if (itemData.containsKey('synonyms')) {
+          List<String> synonyms = itemData['synonyms'].cast<String>();
+          item.addSynonyms(synonyms); // Add synonyms after item creation
+        }
+        loadedItems[i] = item;
       }
       print("Done.");
     }
@@ -127,7 +108,54 @@ class Atlas {
     return loadedItems;
   }
 
-  void fillRooms(List<Item> items) {}
+  Future<dynamic> createItem(Map itemData) async {
+    print('Creating item...');
+    String itemType = itemData['type'];
+    print(itemType);
+
+    switch (itemType) {
+      case 'item':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        Item item = Item(name, description);
+        return item;
+
+      case 'weapon':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        int damage = itemData['damage'];
+        Weapon weapon = Weapon(name, description, damage);
+        return weapon;
+
+      case 'container':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        Container container = Container(name, description);
+
+        if (itemData.containsKey('objects')) {
+          List<dynamic> childItemsData = itemData['objects'];
+          for (var childData in childItemsData) {
+            dynamic childItem = await createItem(childData); // Recursive call
+            container.addItem(childItem);
+          }
+        }
+        return container;
+
+      case 'locked door':
+        // Handle locked door creation here
+        print('Loading locked door');
+        // Return a LockedDoor instance, if applicable
+        break;
+
+      case 'interactable':
+        break;
+      case 'enemy':
+        break;
+
+      default:
+        throw Exception('Invalid item type: $itemType');
+    }
+  }
 
   String move(String direction) {
     print(_rooms[_currentRoom]!.getExits());
@@ -165,6 +193,33 @@ class Atlas {
 
   Room getRoom(int roomid) {
     return _rooms[roomid]!;
+  }
+
+  takeItem(String word, Player player) {
+    Room room = getRoom(_currentRoom);
+    dynamic item = room.removeItem(word);
+    if (item != null) {
+      if (item is Item) {
+        if (player.inventory.addItem(item)) {
+          return 'You took the ${item.name}';
+        } else {
+          return 'You cannot carry any more items';
+        }
+      }
+      if (item is List<Item>) {
+        String output = '';
+        for (var i in item) {
+          if (player.inventory.addItem(i)) {
+            output += 'You took the ${i.name}';
+          } else {
+            output += 'You cannot carry any more items';
+          }
+        }
+        return output;
+      }
+    } else {
+      return 'There is no $word here';
+    }
   }
 }
 

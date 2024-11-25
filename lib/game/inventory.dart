@@ -8,15 +8,21 @@ class Inventory {
     _items = [];
   }
 
-  // Item dropItem(String item) {
-  // }
-
   bool addItem(Item item) {
     if (_items.length >= maxItems) {
       return false;
     }
     _items.add(item);
     return true;
+  }
+
+  Item? removeItem(String itemName) {
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i].isSynonym(itemName)) {
+        return _items.removeAt(i);
+      }
+    }
+    return null;
   }
 
   List<Item> get items => _items;

@@ -76,6 +76,21 @@ class Room {
     if (itemName == "all") {
       return takeAll();
     }
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i].isSynonym(itemName)) {
+        print("found item");
+        return _items.removeAt(i);
+      }
+    }
+  }
+
+  Item? getItem(String itemName) {
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i].isSynonym(itemName)) {
+        return _items[i];
+      }
+    }
+    return null;
   }
 
   List<Item> takeAll() {

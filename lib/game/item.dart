@@ -36,7 +36,16 @@ class Item {
   }
 
   bool isSynonym(String word) {
-    return _synonyms.contains(word) || _name == word;
+    if (_name == word) {
+      print("word was found");
+      return true;
+    }
+    if (_synonyms.contains(word)) {
+      print("synonym found");
+      return true;
+    }
+    print("not found.");
+    return false;
   }
 }
 
@@ -47,4 +56,60 @@ class Weapon extends Item {
       : super(name, description);
 
   int get damage => _damage;
+}
+
+class Container extends Item {
+  late List<Item> _items = [];
+  late bool _open = false;
+
+  Container(String name, String description) : super(name, description);
+
+  void addItem(Item item) {
+    _items.add(item);
+  }
+
+  void removeItem(Item item) {
+    _items.remove(item);
+  }
+
+  String open() {
+    _open = true;
+    return "The $_name is now open.";
+  }
+
+  String close() {
+    _open = false;
+    return "The $_name is now closed.";
+  }
+
+  List<Item> get items => _items;
+
+  String describeItems() {
+    if (_open) {
+      if (_items.isEmpty) {
+        return "The $_name is empty.";
+      }
+      String items = "The $_name contains: ";
+      for (var item in _items) {
+        items += item._name + ", ";
+      }
+      return items;
+    } else {
+      return "";
+    }
+  }
+
+  //when looking specifically at the container
+  String inspect() {
+    if (_open && items.isEmpty) {
+      return "The $_name is empty.";
+    } else {
+      return describeItems();
+    }
+  }
+}
+
+// Dummy item for when an item is not found
+class Dummy extends Item {
+  Dummy() : super("Dummy", "Dummy item");
 }

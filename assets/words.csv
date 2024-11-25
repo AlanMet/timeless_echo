@@ -41,7 +41,10 @@ describe,verb
 enter,verb
 turn,verb
 put,verb
-shoot,verb 
+shoot,verb
+inspect,verb
+eat,verb
+drink,verb
 all,noun
 box,noun
 coins,noun

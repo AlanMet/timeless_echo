@@ -6,6 +6,8 @@ import 'helpers.dart';
 import 'word_and_type.dart';
 import 'room.dart';
 import 'player.dart';
+import 'item.dart';
+import 'inventory.dart';
 
 class Game {
   // Reference to the controller
@@ -100,20 +102,6 @@ class Game {
       }
     }
     runCommand(wordandtype);
-
-    // if (command[0] == 'hello') {
-    //   uiController.updateText("Hello there!");
-    // } else if (command[0] == 'pulse') {
-    //   uiController.pulse(
-    //       Colors.white, Colors.blue, const Duration(milliseconds: 500));
-    // } else if (command[0] == 'stop') {
-    //   uiController.stopPulsing();
-    //   uiController.updateText("Pulse stopped");
-    // } else if (command[0] == 'page') {
-    //   uiController.updatePage(command[1]);
-    // } else {
-    //   uiController.updateText("I beg your pardon?");
-    // }
   }
 
   void runCommand(List<WordAndType> wordAndType) {
@@ -161,7 +149,8 @@ class Game {
         break;
       case "describe":
       case "look":
-        printscrn("You are in a room");
+        //needs modifying.
+        printscrn(map.getCurrentRoom().description);
         break;
       case "north":
       case "n":
@@ -218,19 +207,38 @@ class Game {
     WordAndType noun = wordAndType[1];
     switch (verb.word) {
       case "take":
-        printscrn("You take the ${noun.word}");
+        printscrn(map.takeItem(noun.word, player));
         break;
       case "read":
         printscrn("You read the ${noun.word}");
         break;
       case "drop":
-        printscrn("You drop the ${noun.word}");
+        Inventory inventory = player.inventory;
+        Item? item = inventory.removeItem(noun.word);
+        if (item != null) {
+          map.getCurrentRoom().addItem(item);
+          printscrn("You drop the ${item.name}");
+        } else {
+          printscrn("You don't have a ${noun.word}");
+        }
         break;
       case "open":
-        printscrn("You open the ${noun.word}");
+        Item? item = map.getCurrentRoom().getItem(noun.word);
+        printscrn(item.toString());
+        if (item != null && item is Container) {
+          printscrn(item.open());
+        } else {
+          printscrn("You don't see a ${noun.word} to open");
+        }
         break;
       case "close":
-        printscrn("You close the ${noun.word}");
+        Item? item = map.getCurrentRoom().getItem(noun.word);
+        printscrn(item.toString());
+        if (item != null && item is Container) {
+          printscrn(item.close());
+        } else {
+          printscrn("You don't see a ${noun.word} to open");
+        }
         break;
       case "unlock":
         printscrn("You unlock the ${noun.word}");
@@ -245,6 +253,15 @@ class Game {
       case "move":
       case "walk":
         printscrn("You go to the ${noun.word}");
+        break;
+      case "inspect":
+        printscrn("You inspect the ${noun.word}");
+        break;
+      case "eat":
+        printscrn("You eat the ${noun.word}");
+        break;
+      case "drink":
+        printscrn("You drink the ${noun.word}");
         break;
       default:
         printscrn("Sorry I don't know how to ${verb.word} a ${noun.word}");
