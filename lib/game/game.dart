@@ -82,6 +82,7 @@ class Game {
     }
   }
 
+  //spooky action at a distance
   void parseCommand(String command) {
     _controller.updateText("");
     //tutorial intercepts commands in order to run the order.
@@ -90,18 +91,9 @@ class Game {
       updateText("I beg your pardon?");
     } else {
       List<String> stringList = command.split(RegExp(r'[ .]'));
-      if (map.currentRoom == Tutorial) {
-        String instruction = map.currentRoom.instructions[0];
-        final lowercaseInstruction = instruction.trim().toLowerCase();
-        List<String> instructionList = instruction.split(RegExp(r'[ .]'));
-        if (instructionList.join(" ") == stringList.join(" ")) {
-          map.currentRoom.instructions.removeAt(0);
-          printscrn("${instruction[0]}");
-          map.currentRoom.instructions.removeAt(0);
-          //remove instruction and print the output
-        } else {
-          //almost! try again. + instruction
-        }
+      if (map.currentRoom is Tutorial) {
+        map.currentRoom.processCommand(stringList);
+        return;
       }
       processCommand(stringList);
     }
