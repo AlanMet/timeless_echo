@@ -1,5 +1,6 @@
-import 'dart:developer';
+import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
+import 'dart:math';
 import 'package:timeless_echo/game/map.dart';
 import 'package:timeless_echo/notifier.dart';
 import 'helpers.dart';
@@ -20,7 +21,11 @@ class Game {
   Game(this._controller);
 
   void printscrn(String message) {
-    _controller.updateText(message);
+    _controller.notifyTextListeners();
+  }
+
+  void updateText(String text) {
+    _controller.updateText(text, "a");
   }
 
   Future<void> loadData() async {
@@ -43,7 +48,7 @@ class Game {
     try {
       contents = await rootBundle.loadString('assets/words.csv');
     } catch (e) {
-      log("Error loading dictionary: $e");
+      developer.log("Error loading dictionary: $e");
       return;
     }
     for (var line in contents.split('\n')) {
@@ -78,10 +83,11 @@ class Game {
   }
 
   void parseCommand(String command) {
+    _controller.updateText("");
     //tutorial intercepts commands in order to run the order.
     final lowercase = command.trim().toLowerCase();
     if (lowercase.isEmpty) {
-      print("I beg your pardon?");
+      updateText("I beg your pardon?");
     } else {
       List<String> stringList = command.split(RegExp(r'[ .]'));
       if (map.currentRoom == Tutorial) {
@@ -208,7 +214,26 @@ class Game {
         printscrn(map.move("down"));
         break;
       case "run":
-        printscrn("You run");
+        print("running.");
+        List<int> exits = map.getCurrentRoom().getExits();
+        List<String> directions = [
+          "north",
+          "northeast",
+          "east",
+          "southeast",
+          "south",
+          "southwest",
+          "west",
+          "northwest",
+          "up",
+          "down"
+        ];
+        Random random = Random();
+        int index = random.nextInt(exits.length);
+        while (exits[index] == -1) {
+          index = random.nextInt(exits.length);
+        }
+        printscrn(map.move(directions[index]));
         break;
       default:
         printscrn("Sorry I can't ${verb.word}");

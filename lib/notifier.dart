@@ -25,11 +25,24 @@ class Controller extends ChangeNotifier {
   factory Controller() {
     return _instance; // always returns the same insance
   }
-  void updateText(String text) {
-    _text = parseText(text);
+
+  void updateText(String text, [String? mode]) {
+    if (mode == null || mode == 'w') {
+      _text = parseText(text);
+    } else if (mode == 'a') {
+      _text += parseText(text);
+    }
     _history.add(_text);
-    notifyListeners(); // Notify listeners immediately
     print("Text updated to: $_text");
+  }
+
+  void notifyTextListeners() {
+    notifyListeners(); // Notify listeners separately
+  }
+
+  void updateMenu(String menu) {
+    this.menu = menu;
+    notifyListeners();
   }
 
   //issues wityh loading from firebase
