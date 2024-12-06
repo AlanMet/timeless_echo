@@ -233,12 +233,10 @@ class Game {
         }
         break;
       case "open":
-        Item? item = map.getCurrentRoom().getItem(noun.word);
-        printscrn(item.toString());
-        if (item != null && item is Container) {
-          printscrn(item.open());
+        if (map.getCurrentRoom() is InteractableRoom) {
+          openDoor(noun);
         } else {
-          printscrn("You don't see a ${noun.word} to open");
+          openContainer(noun);
         }
         break;
       case "close":
@@ -276,6 +274,30 @@ class Game {
       default:
         printscrn("Sorry I don't know how to ${verb.word} a ${noun.word}");
         break;
+    }
+  }
+
+  void openContainer(WordAndType noun) {
+    Item? item = map.getCurrentRoom().getItem(noun.word);
+    printscrn(item.toString());
+    if (item != null && item is Container) {
+      printscrn(item.open());
+    } else {
+      printscrn("You don't see a ${noun.word} to open");
+    }
+  }
+
+  void openDoor(WordAndType noun) {
+    if (map.getCurrentRoom() is InteractableRoom) {
+      InteractableRoom room = map.getCurrentRoom() as InteractableRoom;
+      for (int interactables in room.interactables) {
+        if (interactables != -1) {}
+      }
+      if (room.openDoor(noun.word)) {
+        printscrn("You open the ${noun.word}");
+      } else {
+        printscrn("You can't open the ${noun.word}");
+      }
     }
   }
 

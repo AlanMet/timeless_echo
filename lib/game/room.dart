@@ -111,6 +111,8 @@ class Room {
 class InteractableRoom extends Room {
   final List<IInteractable> _interactables = [];
 
+  get interactables => _interactables;
+
   InteractableRoom(super.id, super.name, super.description);
 
   InteractableRoom.withExits(
