@@ -12,7 +12,7 @@ class TypingText extends StatefulWidget {
   const TypingText(
       {super.key,
       required this.text,
-      this.speed = const Duration(milliseconds: 100),
+      this.speed = const Duration(milliseconds: 75),
       required this.uiController});
 
   @override

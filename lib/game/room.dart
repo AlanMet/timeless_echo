@@ -109,7 +109,7 @@ class Room {
 }
 
 class InteractableRoom extends Room {
-  final List<IInteractable> _interactables = [];
+  List<dynamic> interactables = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
   InteractableRoom(super.id, super.name, super.description);
 

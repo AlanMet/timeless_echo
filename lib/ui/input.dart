@@ -19,7 +19,7 @@ class _TextInputState extends State<TextInput> {
     textController.clear();
     if (input.isNotEmpty) {
       List<String> commands = input.split(' ');
-      print(commands);
+      print("Processing commands : $commands");
       Controller().game.processCommand(commands);
       textController.clear();
     }

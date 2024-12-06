@@ -21,11 +21,8 @@ class Game {
   Game(this._controller);
 
   void printscrn(String message) {
+    _controller.updateText(message);
     _controller.notifyTextListeners();
-  }
-
-  void updateText(String text) {
-    _controller.updateText(text, "a");
   }
 
   Future<void> loadData() async {
@@ -88,7 +85,7 @@ class Game {
     //tutorial intercepts commands in order to run the order.
     final lowercase = command.trim().toLowerCase();
     if (lowercase.isEmpty) {
-      updateText("I beg your pardon?");
+      printscrn("I beg your pardon?");
     } else {
       List<String> stringList = command.split(RegExp(r'[ .]'));
       if (map.currentRoom is Tutorial) {
@@ -311,7 +308,9 @@ class Game {
         switch (verb2.word) {
           case "north":
           case "n":
+            print("moving north");
             printscrn(map.move("north"));
+
             break;
           case "northeast":
           case "ne":

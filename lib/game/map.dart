@@ -11,6 +11,8 @@ import 'player.dart';
 
 class Atlas {
   Map<int, Room> _rooms = {};
+  //items that get referenced in multiple areas.
+  Map<int, dynamic> floatingItems = {};
   int _currentRoom = 0;
 
   get currentRoom => _rooms[_currentRoom];
@@ -44,9 +46,15 @@ class Atlas {
           Room room = Room.withExits(i, name, description, exits);
           loadedRooms[room.id] = room;
           break;
-        case 'interactable':
+        case 'interactable room':
+          print('Loading interactable room');
           InteractableRoom room =
               InteractableRoom.withExits(i, name, description, exits);
+          if (roomdata.containsKey('interactables')) {
+            List<dynamic> interactables = roomdata['interactables'];
+            room.interactables = interactables;
+          }
+          print('Loaded interactable room');
           loadedRooms[room.id] = room;
           break;
         case 'tutorial room':
@@ -64,6 +72,8 @@ class Atlas {
           if (objects.containsKey(itemid)) {
             loadedRooms[i]!.addItem(objects[itemid]);
             print('Added ${objects[itemid].name} to room $i');
+          } else {
+            print('Item $itemid not found');
           }
         }
       }
@@ -90,18 +100,27 @@ class Atlas {
 
     for (var i = 0; i < data.length; i++) {
       print("Loading item $i/${data.length}");
-      var itemData = data[i];
-      //only loading type at this stage bnecause storage isn't consistent
-      //(firebase removes empty entries so consistency is not possible)
-      dynamic item = await createItem(itemData);
-      if (item != null) {
-        if (itemData.containsKey('synonyms')) {
-          List<String> synonyms = itemData['synonyms'].cast<String>();
-          item.addSynonyms(synonyms); // Add synonyms after item creation
+      if (data[i] != null) {
+        var itemData = data[i];
+        //only loading type at this stage bnecause storage isn't consistent
+        //(firebase removes empty entries so consistency is not possible)
+        dynamic item = await createItem(itemData);
+        if (item != null) {
+          if (itemData.containsKey('synonyms')) {
+            List<String> synonyms = itemData['synonyms'].cast<String>();
+            item.addSynonyms(synonyms); // Add synonyms after item creation
+          }
+          if (item is Door || item.runtimeType == Door) {
+            LockedDoor door = item;
+            print("Adding door to floating items");
+            floatingItems[i] = door;
+            print(floatingItems);
+          } else {
+            loadedItems[i] = item;
+          }
         }
-        loadedItems[i] = item;
+        print("Done.");
       }
-      print("Done.");
     }
     print("Done.");
 
@@ -142,16 +161,19 @@ class Atlas {
         return container;
 
       case 'locked door':
+        print('Creating locked door...');
         // Handle locked door creation here
-        print('Loading locked door');
-        // Return a LockedDoor instance, if applicable
-        break;
-
+        String name = itemData['name'];
+        int room1 = itemData['rooms'][0];
+        int room2 = itemData['rooms'][1];
+        int keyid = itemData['key'];
+        LockedDoor door = LockedDoor(keyid, name, room1, room2);
+        print(door.runtimeType);
+        return door;
       case 'interactable':
         break;
       case 'enemy':
         break;
-
       default:
         throw Exception('Invalid item type: $itemType');
     }
@@ -173,21 +195,35 @@ class Atlas {
     };
 
     int newIndex = -1;
-
+    int directionIndex = -1;
+    //all roomtypes have exits
     if (directions.containsKey(direction)) {
-      int directionIndex = directions[direction]!;
+      directionIndex = directions[direction]!;
       int newindex = _rooms[_currentRoom]!.getExits()[directionIndex];
       newIndex = newindex;
     } else {
       return 'Invalid direction';
     }
 
-    if (newIndex == -1) {
-      return 'You cannot go that way';
-    } else {
+    if (newIndex != -1) {
+      // if exit
       _currentRoom = newIndex;
       Room room = getRoom(_currentRoom);
       return "${room.name}\n${room.description}";
+    } else {
+      // if no exit
+      Room currentRoom = getRoom(_currentRoom);
+      if (currentRoom is InteractableRoom) {
+        InteractableRoom room = currentRoom;
+        print(room.interactables);
+        if (room.interactables[directionIndex] != null) {
+          return "'Interacting with ${room.interactables[directionIndex]}'";
+        } else {
+          return 'You cannot go that way';
+        }
+      } else {
+        return 'You cannot go that way';
+      }
     }
   }
 
