@@ -4,23 +4,17 @@ abstract class IInteractable {
   void interact(bool flag, {Item? item});
 }
 
-class Window implements IInteractable {
-  bool isOpen = false;
-
-  @override
-  void interact(bool flag, {Item? item}) {
-    if (flag) {
-      print("You open the window.");
-      isOpen = true;
-    } else {
-      print("You close the window.");
-      isOpen = false;
-    }
-  }
-}
-
 class Door implements IInteractable {
   bool isOpen = false;
+  late String _name;
+
+  List<int> _rooms = [];
+
+  Door(String name, int room1, int room2) {
+    _rooms.add(room1);
+    _rooms.add(room2);
+    _name = name;
+  }
 
   @override
   void interact(bool flag, {Item? item}) {
@@ -32,24 +26,21 @@ class Door implements IInteractable {
       isOpen = false;
     }
   }
+
+  List<int> getRooms() {
+    return _rooms;
+  }
 }
 
 class LockedDoor extends Door {
   bool isLocked = true;
-  final Item requiredKey;
+  final int requiredKey;
 
-  LockedDoor(this.requiredKey);
+  LockedDoor(this.requiredKey, String name, int room1, int room2)
+      : super(name, room1, room2);
 
   void lock(bool lockFlag, {Item? item}) {
-    if (lockFlag) {
-      print("You lock the door.");
-      isLocked = true;
-    } else if (item != null && item.name == requiredKey.name) {
-      print("You unlock the door using the ${item.name}.");
-      isLocked = false;
-    } else {
-      print("You don't have the correct key to unlock this door.");
-    }
+    return;
   }
 
   @override
@@ -78,17 +69,6 @@ class Rug implements IInteractable {
   }
 }
 
-class Trapdoor implements IInteractable {
-  bool isOpen = false;
-
-  @override
-  void interact(bool flag, {Item? item}) {
-    if (flag) {
-      print("You open the trapdoor.");
-      isOpen = true;
-    } else {
-      print("You close the trapdoor.");
-      isOpen = false;
-    }
-  }
+class Trapdoor extends Door {
+  Trapdoor(String name, int room1, int room2) : super(name, room1, room2);
 }
