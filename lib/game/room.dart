@@ -72,6 +72,17 @@ class Room {
     _items.add(item);
   }
 
+  String describe() {
+    String output = "$_name\n$_description\n";
+    if (_items.isNotEmpty) {
+      output += "The room contains: ";
+      for (var item in _items) {
+        output += item.name + ", ";
+      }
+    }
+    return output;
+  }
+
   dynamic removeItem(String itemName) {
     if (itemName == "all") {
       return takeAll();
@@ -80,6 +91,13 @@ class Room {
       if (_items[i].isSynonym(itemName)) {
         print("found item");
         return _items.removeAt(i);
+      }
+      if (_items[i] is Container) {
+        Container container = _items[i] as Container;
+        Item? item = container.removeItemByName(itemName);
+        if (item != null) {
+          return item;
+        }
       }
     }
   }
@@ -111,8 +129,6 @@ class Room {
 class InteractableRoom extends Room {
   List<dynamic> interactables = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
-  get interactables => _interactables;
-
   InteractableRoom(super.id, super.name, super.description);
 
   InteractableRoom.withExits(
@@ -120,7 +136,7 @@ class InteractableRoom extends Room {
       : super.withExits(id, name, description, exits);
 }
 
-class Tutorial extends InteractableRoom {
+class Tutorial extends Room {
   late List<String> _steps;
 
   Tutorial(super.id, super.name, super.description) {

@@ -147,16 +147,28 @@ class Atlas {
         return weapon;
 
       case 'container':
+        print('Creating container...');
         String name = itemData['name'];
         String description = itemData['description'];
         Container container = Container(name, description);
 
         if (itemData.containsKey('objects')) {
           List<dynamic> childItemsData = itemData['objects'];
+
           for (var childData in childItemsData) {
+            print(childData);
             dynamic childItem = await createItem(childData); // Recursive call
+
+            if (childData.containsKey('synonyms')) {
+              List<String> synonyms = childData['synonyms'].cast<String>();
+              childItem
+                  .addSynonyms(synonyms); // Add synonyms after item creation
+            }
+
             container.addItem(childItem);
           }
+        } else {
+          print('No objects in container');
         }
         return container;
 
@@ -172,6 +184,18 @@ class Atlas {
         return door;
       case 'interactable':
         break;
+      case 'food':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        int health = itemData['health'];
+        Food food = Food(name, description, health);
+        return food;
+      case 'drink':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        int health = itemData['health'];
+        Drink drink = Drink(name, description, health);
+        return drink;
       case 'enemy':
         break;
       default:
@@ -209,7 +233,7 @@ class Atlas {
       // if exit
       _currentRoom = newIndex;
       Room room = getRoom(_currentRoom);
-      return "${room.name}\n${room.description}";
+      return room.describe();
     } else {
       // if no exit
       Room currentRoom = getRoom(_currentRoom);
@@ -242,17 +266,17 @@ class Atlas {
           return 'You cannot carry any more items';
         }
       }
-      if (item is List<Item>) {
-        String output = '';
-        for (var i in item) {
-          if (player.inventory.addItem(i)) {
-            output += 'You took the ${i.name}';
-          } else {
-            output += 'You cannot carry any more items';
-          }
-        }
-        return output;
-      }
+      // if (item is List<Item>) {
+      //   String output = '';
+      //   for (var i in item) {
+      //     if (player.inventory.addItem(i)) {
+      //       output += 'You took the ${i.name}';
+      //     } else {
+      //       output += 'You cannot carry any more items';
+      //     }
+      //   }
+      //   return output;
+      // }
     } else {
       return 'There is no $word here';
     }

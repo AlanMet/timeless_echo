@@ -6,6 +6,7 @@ import 'package:timeless_echo/notifier.dart';
 import 'helpers.dart';
 import 'word_and_type.dart';
 import 'room.dart';
+import 'interactibles.dart';
 import 'player.dart';
 import 'item.dart';
 import 'inventory.dart';
@@ -34,7 +35,7 @@ class Game {
     await map.loadRooms(items);
     Room currentRoom = map.getCurrentRoom();
     print("current room: ${currentRoom.name}");
-    _controller.updateText("${currentRoom.name}\n${currentRoom.description}");
+    _controller.updateText(currentRoom.describe());
 
     print("Data loaded...");
     return;
@@ -129,7 +130,10 @@ class Game {
     String commandTypes =
         wordAndType.map((word) => word.type.toString()).toList().toString();
 
+    print(commandTypes);
+
     if (commandMap.containsKey(commandTypes)) {
+      print("running command: ${commandMap[commandTypes]}");
       commandMap[commandTypes]!(wordAndType);
     } else {
       print("I beg your pardon?");
@@ -231,6 +235,7 @@ class Game {
   }
 
   void processVerbNoun(List<WordAndType> wordAndType) {
+    print("Processing verb and noun");
     WordAndType verb = wordAndType[0];
     WordAndType noun = wordAndType[1];
     switch (verb.word) {
@@ -252,18 +257,16 @@ class Game {
         break;
       case "open":
         if (map.getCurrentRoom() is InteractableRoom) {
-          openDoor(noun);
+          interactDoor(noun, flag: true);
         } else {
-          openContainer(noun);
+          interactContainer(noun, flag: true);
         }
         break;
       case "close":
-        Item? item = map.getCurrentRoom().getItem(noun.word);
-        printscrn(item.toString());
-        if (item != null && item is Container) {
-          printscrn(item.close());
+        if (map.getCurrentRoom() is InteractableRoom) {
+          interactDoor(noun, flag: false);
         } else {
-          printscrn("You don't see a ${noun.word} to open");
+          interactContainer(noun, flag: false);
         }
         break;
       case "unlock":
@@ -284,10 +287,10 @@ class Game {
         printscrn("You inspect the ${noun.word}");
         break;
       case "eat":
-        printscrn("You eat the ${noun.word}");
+        printscrn(player.eat(noun.word));
         break;
       case "drink":
-        printscrn("You drink the ${noun.word}");
+        printscrn(player.eat(noun.word));
         break;
       default:
         printscrn("Sorry I don't know how to ${verb.word} a ${noun.word}");
@@ -295,26 +298,47 @@ class Game {
     }
   }
 
-  void openContainer(WordAndType noun) {
+  void interactContainer(WordAndType noun, {bool flag = true}) {
     Item? item = map.getCurrentRoom().getItem(noun.word);
     printscrn(item.toString());
     if (item != null && item is Container) {
-      printscrn(item.open());
+      if (flag) {
+        printscrn(item.open());
+      } else {
+        printscrn(item.close());
+      }
     } else {
       printscrn("You don't see a ${noun.word} to open");
     }
   }
 
-  void openDoor(WordAndType noun) {
-    if (map.getCurrentRoom() is InteractableRoom) {
-      InteractableRoom room = map.getCurrentRoom() as InteractableRoom;
-      for (int interactables in room.interactables) {
-        if (interactables != -1) {}
-      }
-      if (room.openDoor(noun.word)) {
-        printscrn("You open the ${noun.word}");
-      } else {
-        printscrn("You can't open the ${noun.word}");
+  void interactDoor(WordAndType noun, {bool flag = true}) {
+    InteractableRoom room = map.getCurrentRoom() as InteractableRoom;
+    for (int interactable in room.interactables) {
+      if (interactable != -1) {
+        //get interactable and check name
+        var door = map.floatingItems[interactable];
+        //check if door is Locked door or Door
+        String type = door.runtimeType.toString();
+        //
+        switch (type) {
+          case 'Door':
+            Door thing = door as Door;
+            printscrn(thing.interact(flag));
+            break;
+          case 'LockedDoor':
+            LockedDoor thing = door as LockedDoor;
+            printscrn(thing.interact(flag));
+            break;
+          case 'Trapdoor':
+            Trapdoor thing = door as Trapdoor;
+            printscrn(thing.interact(flag));
+            break;
+          default:
+            print("runtime type: $type");
+            printscrn("You don't see a door to open");
+            break;
+        }
       }
     }
   }
@@ -391,5 +415,18 @@ class Game {
 
   void processVerbNounPrepositionNoun(List<WordAndType> wordAndType) {
     printscrn("Processing verb noun preposition noun");
+    //open door with key
+    WordAndType verb = wordAndType[0];
+    WordAndType noun1 = wordAndType[1];
+    WordAndType noun2 = wordAndType[3];
+    switch (verb.word) {
+      case "open":
+        if (map.getCurrentRoom() is InteractableRoom) {
+          interactDoor(noun1, flag: true);
+        } else {
+          interactContainer(noun1, flag: true);
+        }
+        break;
+    }
   }
 }

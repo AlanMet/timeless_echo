@@ -1,4 +1,5 @@
 import 'inventory.dart';
+import 'item.dart';
 import 'package:timeless_echo/notifier.dart';
 
 class Player {
@@ -21,4 +22,40 @@ class Player {
   }
 
   get inventory => _inventory;
+
+  String eat(String itemName) {
+    for (var item in _inventory.items) {
+      if (item.isSynonym(itemName)) {
+        if (item is Food) {
+          _health += item.health;
+          if (_health > 100) {
+            _health = 100;
+          }
+          _inventory.removeItem(item.name);
+          return "You ate the ${item.name}. Your health is now $_health.";
+        } else {
+          return "You can't eat that!";
+        }
+      }
+    }
+    return "You don't have that item!";
+  }
+
+  String drink(String itemName) {
+    for (var item in _inventory.items) {
+      if (item.isSynonym(itemName)) {
+        if (item is Drink) {
+          thirst += item.health;
+          if (thirst > 100) {
+            thirst = 100;
+          }
+          _inventory.removeItem(item.name);
+          return "You drank the ${item.name}. Your thirst is now $thirst.";
+        } else {
+          return "You can't drink that!";
+        }
+      }
+    }
+    return "You don't have that item!";
+  }
 }

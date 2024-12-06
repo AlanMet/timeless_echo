@@ -49,6 +49,20 @@ class Item {
   }
 }
 
+class Food extends Item {
+  late final int _health;
+
+  Food(String name, String description, this._health)
+      : super(name, description);
+
+  int get health => _health;
+}
+
+class Drink extends Food {
+  Drink(String name, String description, int health)
+      : super(name, description, health);
+}
+
 class Weapon extends Item {
   late final int _damage;
 
@@ -72,9 +86,33 @@ class Container extends Item {
     _items.remove(item);
   }
 
+  Item? removeItemByName(String itemName) {
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i].isSynonym(itemName)) {
+        return _items.removeAt(i);
+      }
+    }
+    return null;
+  }
+
   String open() {
     _open = true;
-    return "The $_name is now open.";
+    String output = "The $_name is now open.\n";
+    if (_items.isEmpty) {
+      output += "It is empty.";
+    } else {
+      output += "It contains: ";
+      for (int i = 0; i < _items.length; i++) {
+        output += _items[i]._name;
+        if (i == _items.length - 2) {
+          output += " and ";
+        } else if (i < _items.length - 2) {
+          output += ", ";
+        }
+      }
+    }
+
+    return output;
   }
 
   String close() {

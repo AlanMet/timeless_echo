@@ -1,7 +1,7 @@
 import 'item.dart';
 
 abstract class IInteractable {
-  void interact(bool flag, {Item? item});
+  String interact(bool flag);
 }
 
 class Door implements IInteractable {
@@ -17,13 +17,13 @@ class Door implements IInteractable {
   }
 
   @override
-  void interact(bool flag, {Item? item}) {
+  String interact(bool flag) {
     if (flag) {
-      print("You open the door.");
       isOpen = true;
+      return "You open the ${_name}.";
     } else {
-      print("You close the door.");
       isOpen = false;
+      return "You close the ${_name}.";
     }
   }
 
@@ -44,11 +44,19 @@ class LockedDoor extends Door {
   }
 
   @override
-  void interact(bool flag, {Item? item}) {
-    if (isLocked) {
-      print("The door is locked. You need the correct key.");
+  String interact(bool flag) {
+    if (flag) {
+      if (isLocked) {
+        return "The ${_name} is locked. You need the correct key.";
+      } else {
+        return super.interact(flag);
+      }
     } else {
-      super.interact(flag);
+      if (!isOpen) {
+        return "The ${_name} is already closed.";
+      } else {
+        return super.interact(flag);
+      }
     }
   }
 }
@@ -59,13 +67,8 @@ class Rug implements IInteractable {
   Rug(this.hiddenInteractable);
 
   @override
-  void interact(bool flag, {Item? item}) {
-    if (flag) {
-      print("You move the rug and reveal something hidden.");
-      hiddenInteractable.interact(true, item: item);
-    } else {
-      print("You place the rug back.");
-    }
+  String interact(bool flag) {
+    return "idk";
   }
 }
 
