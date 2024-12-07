@@ -13,7 +13,7 @@ class Atlas {
   Map<int, Room> _rooms = {};
   //items that get referenced in multiple areas.
   Map<int, dynamic> floatingItems = {};
-  int _currentRoom = 0;
+  int _currentRoom = 7;
 
   get currentRoom => _rooms[_currentRoom];
 
@@ -104,7 +104,7 @@ class Atlas {
         var itemData = data[i];
         //only loading type at this stage bnecause storage isn't consistent
         //(firebase removes empty entries so consistency is not possible)
-        dynamic item = await createItem(itemData);
+        dynamic item = await createItem(itemData, i);
         if (item != null) {
           if (itemData.containsKey('synonyms')) {
             List<String> synonyms = itemData['synonyms'].cast<String>();
@@ -127,7 +127,7 @@ class Atlas {
     return loadedItems;
   }
 
-  Future<dynamic> createItem(Map itemData) async {
+  Future<dynamic> createItem(Map itemData, int id) async {
     print('Creating item...');
     String itemType = itemData['type'];
     print(itemType);
@@ -136,28 +136,29 @@ class Atlas {
       case 'item':
         String name = itemData['name'];
         String description = itemData['description'];
-        Item item = Item(name, description);
+        Item item = Item(id, name, description);
         return item;
 
       case 'weapon':
         String name = itemData['name'];
         String description = itemData['description'];
         int damage = itemData['damage'];
-        Weapon weapon = Weapon(name, description, damage);
+        Weapon weapon = Weapon(id, name, description, damage);
         return weapon;
 
       case 'container':
         print('Creating container...');
         String name = itemData['name'];
         String description = itemData['description'];
-        Container container = Container(name, description);
+        Container container = Container(id, name, description);
 
         if (itemData.containsKey('objects')) {
           List<dynamic> childItemsData = itemData['objects'];
 
           for (var childData in childItemsData) {
             print(childData);
-            dynamic childItem = await createItem(childData); // Recursive call
+            dynamic childItem =
+                await createItem(childData, id); // Recursive call
 
             if (childData.containsKey('synonyms')) {
               List<String> synonyms = childData['synonyms'].cast<String>();
@@ -188,13 +189,13 @@ class Atlas {
         String name = itemData['name'];
         String description = itemData['description'];
         int health = itemData['health'];
-        Food food = Food(name, description, health);
+        Food food = Food(id, name, description, health);
         return food;
       case 'drink':
         String name = itemData['name'];
         String description = itemData['description'];
         int health = itemData['health'];
-        Drink drink = Drink(name, description, health);
+        Drink drink = Drink(id, name, description, health);
         return drink;
       case 'enemy':
         break;
@@ -241,7 +242,18 @@ class Atlas {
         InteractableRoom room = currentRoom;
         print(room.interactables);
         if (room.interactables[directionIndex] != null) {
-          return "'Interacting with ${room.interactables[directionIndex]}'";
+          int interactableID = room.interactables[directionIndex];
+          if (floatingItems[interactableID] is Door) {
+            LockedDoor door = floatingItems[interactableID];
+            if (door.isOpen) {
+              _currentRoom = door.getRooms()[1];
+              Room room = getRoom(_currentRoom);
+              return room.describe();
+            } else {
+              return 'The ${door.name} is closed';
+            }
+          }
+          return "found";
         } else {
           return 'You cannot go that way';
         }

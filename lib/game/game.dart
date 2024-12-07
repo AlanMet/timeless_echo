@@ -414,17 +414,50 @@ class Game {
   }
 
   void processVerbNounPrepositionNoun(List<WordAndType> wordAndType) {
-    printscrn("Processing verb noun preposition noun");
+    //print("Processing verb noun preposition noun");
     //open door with key
     WordAndType verb = wordAndType[0];
     WordAndType noun1 = wordAndType[1];
     WordAndType noun2 = wordAndType[3];
     switch (verb.word) {
+      case "unlock":
       case "open":
+        //find noun1 in room
+        //find noun2 in inventory
+        //if both exist, check if noun1 is a locked door
+        //if it is, use noun2 to open noun1
+
         if (map.getCurrentRoom() is InteractableRoom) {
-          interactDoor(noun1, flag: true);
+          for (int interactable
+              in (map.getCurrentRoom() as InteractableRoom).interactables) {
+            if (interactable != -1) {
+              //get interactable and check name
+              var door = map.floatingItems[interactable];
+              //check if door is Locked door or Door
+              String type = door.runtimeType.toString();
+              switch (type) {
+                case 'LockedDoor':
+                  LockedDoor thing = door as LockedDoor;
+                  int keyid = thing.requiredKey;
+                  Item? key = player.inventory.getItem(noun2.word);
+                  if (key != null && key.id == keyid) {
+                    printscrn(thing.unlock(keyid));
+                    player.inventory.removeItem(noun2.word);
+                    return;
+                  } else {
+                    printscrn("You don't have the correct key");
+                    return;
+                  }
+                default:
+                  // no printscrn because in loop
+                  print("No door.");
+                  break;
+              }
+            }
+          }
+          printscrn("You don't see a ${noun2} to open");
         } else {
-          interactContainer(noun1, flag: true);
+          printscrn("You don't see a ${noun2} to open");
         }
         break;
     }

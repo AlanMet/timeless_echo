@@ -31,6 +31,15 @@ class Inventory {
     return _items.contains(item);
   }
 
+  Item getItem(String itemName) {
+    for (var item in _items) {
+      if (item.isSynonym(itemName)) {
+        return item;
+      }
+    }
+    throw ArgumentError('Item not found');
+  }
+
   @override
   String toString() {
     if (_items.isEmpty) {

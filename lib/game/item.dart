@@ -1,15 +1,17 @@
 class Item {
+  late final int _id;
   late final String _name;
   late final String _description;
   List<String> _synonyms = [];
   late bool _takeable;
   late String _rejectionMessage;
 
-  Item(this._name, this._description) : _takeable = true;
+  Item(this._id, this._name, this._description) : _takeable = true;
   Item.untakable(
       this._name, this._description, this._synonyms, this._rejectionMessage)
       : _takeable = false;
 
+  int get id => _id;
   String get name => _name;
   String get description => _description;
   bool get takeable => _takeable;
@@ -52,22 +54,22 @@ class Item {
 class Food extends Item {
   late final int _health;
 
-  Food(String name, String description, this._health)
-      : super(name, description);
+  Food(int id, String name, String description, this._health)
+      : super(id, name, description);
 
   int get health => _health;
 }
 
 class Drink extends Food {
-  Drink(String name, String description, int health)
-      : super(name, description, health);
+  Drink(int id, String name, String description, int health)
+      : super(id, name, description, health);
 }
 
 class Weapon extends Item {
   late final int _damage;
 
-  Weapon(String name, String description, this._damage)
-      : super(name, description);
+  Weapon(int id, String name, String description, this._damage)
+      : super(id, name, description);
 
   int get damage => _damage;
 }
@@ -76,7 +78,8 @@ class Container extends Item {
   late List<Item> _items = [];
   late bool _open = false;
 
-  Container(String name, String description) : super(name, description);
+  Container(int id, String name, String description)
+      : super(id, name, description);
 
   void addItem(Item item) {
     _items.add(item);
@@ -149,5 +152,5 @@ class Container extends Item {
 
 // Dummy item for when an item is not found
 class Dummy extends Item {
-  Dummy() : super("Dummy", "Dummy item");
+  Dummy() : super(-1, "Dummy", "Dummy item");
 }

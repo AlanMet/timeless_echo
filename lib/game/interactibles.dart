@@ -8,6 +8,8 @@ class Door implements IInteractable {
   bool isOpen = false;
   late String _name;
 
+  get name => _name;
+
   List<int> _rooms = [];
 
   Door(String name, int room1, int room2) {
@@ -57,6 +59,15 @@ class LockedDoor extends Door {
       } else {
         return super.interact(flag);
       }
+    }
+  }
+
+  String unlock(int keyId) {
+    if (keyId == requiredKey) {
+      isLocked = false;
+      return "You unlock the ${_name}.";
+    } else {
+      return "The key doesn't fit.";
     }
   }
 }
