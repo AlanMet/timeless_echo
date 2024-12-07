@@ -155,6 +155,11 @@ class Game {
         _controller.theme.toggleTheme(true);
         print("Dark mode activated");
         break;
+      case "crouch":
+        player.crouched = true;
+        printscrn("You crouch down");
+        //if room is room number 1, printscrn("You see a mirror below the bed. It looks like there is another world through it.");
+        break;
       case "i":
       case "inv":
       case "inventory":

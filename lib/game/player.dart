@@ -6,6 +6,7 @@ class Player {
   late int _health = 90;
   int hunger = 100;
   int thirst = 100;
+  bool crouched = false;
 
   Controller controller = Controller();
   Inventory _inventory = Inventory();
