@@ -13,7 +13,7 @@ class Atlas {
   Map<int, Room> _rooms = {};
   //items that get referenced in multiple areas.
   Map<int, dynamic> floatingItems = {};
-  int _currentRoom = 7;
+  int _currentRoom = 0;
 
   get currentRoom => _rooms[_currentRoom];
 
@@ -58,7 +58,9 @@ class Atlas {
           loadedRooms[room.id] = room;
           break;
         case 'tutorial room':
-          Tutorial room = Tutorial.withExits(i, name, description, exits);
+          List<String> steps = roomdata['instructions'].cast<String>();
+          Tutorial room =
+              Tutorial.withSteps(i, name, description, exits, steps);
           loadedRooms[room.id] = room;
           break;
         default:
@@ -82,10 +84,14 @@ class Atlas {
     return _rooms;
   }
 
+  void setRoom(int roomid) {
+    _currentRoom = roomid;
+  }
+
   Future<Map<int, dynamic>> loadItems() async {
     print('Loading items...');
     DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('objects');
-    //dynamic because while item is the superclass, interactables are also loaded here.
+    // Using a dynamic map because the items might have different types
     Map<int, dynamic> loadedItems = {};
 
     var data;
@@ -93,37 +99,64 @@ class Atlas {
     try {
       final snapshot = await dbRef.get();
       data = snapshot.value;
-      print(data);
+      print('Raw data from Firebase: $data');
     } catch (e) {
-      print('Error loading rooms from Firebase: $e');
+      print('Error loading items from Firebase: $e');
+      return loadedItems; // Return an empty map if an error occurs
     }
 
-    for (var i = 0; i < data.length; i++) {
-      print("Loading item $i/${data.length}");
-      if (data[i] != null) {
-        var itemData = data[i];
-        //only loading type at this stage bnecause storage isn't consistent
-        //(firebase removes empty entries so consistency is not possible)
-        dynamic item = await createItem(itemData, i);
-        if (item != null) {
-          if (itemData.containsKey('synonyms')) {
-            List<String> synonyms = itemData['synonyms'].cast<String>();
-            item.addSynonyms(synonyms); // Add synonyms after item creation
-          }
-          if (item is Door || item.runtimeType == Door) {
-            LockedDoor door = item;
-            print("Adding door to floating items");
-            floatingItems[i] = door;
-            print(floatingItems);
-          } else {
-            loadedItems[i] = item;
-          }
+    if (data == null) {
+      print("Data is null");
+      return loadedItems; // Return early if no data is found
+    }
+
+    print("Data is not null");
+    print("Data runtimeType: ${data.runtimeType}");
+
+    // Ensure the data is a Map
+    if (data is Map) {
+      for (var entry in data.entries) {
+        var key = int.tryParse(
+            entry.key.toString()); // Convert key to int if possible
+        var itemData = entry.value;
+        if (key == null) {
+          print("Key is null");
+          continue;
         }
-        print("Done.");
-      }
-    }
-    print("Done.");
 
+        print("Processing item with key: $key");
+        if (itemData != null) {
+          print("Item data: $itemData");
+
+          // Create the item using the provided item data
+          dynamic item = await createItem(itemData, key);
+          if (item != null) {
+            // Add synonyms if present
+            if (itemData.containsKey('synonyms')) {
+              List<String> synonyms = itemData['synonyms'].cast<String>();
+              item.addSynonyms(synonyms);
+            }
+
+            // Handle doors separately
+            if (item is Door || item.runtimeType == Door) {
+              LockedDoor door = item as LockedDoor;
+              print("Adding door to floating items");
+              floatingItems[key] = door;
+              print("Floating items: $floatingItems");
+            } else {
+              loadedItems[key] = item;
+            }
+          }
+          print("Item processing done for key: $key");
+        } else {
+          print("Item with key $key is null");
+        }
+      }
+    } else {
+      print("Data is not a Map");
+    }
+
+    print("All items loaded: $loadedItems");
     return loadedItems;
   }
 
@@ -171,6 +204,10 @@ class Atlas {
         } else {
           print('No objects in container');
         }
+
+        if (itemData.containsKey('takeable')) {
+          container.setTakeable(itemData['takeable'] as bool);
+        }
         return container;
 
       case 'locked door':
@@ -183,8 +220,12 @@ class Atlas {
         LockedDoor door = LockedDoor(keyid, name, room1, room2);
         print(door.runtimeType);
         return door;
-      case 'interactable':
-        break;
+      case 'book':
+        String name = itemData['name'];
+        String description = itemData['description'];
+        String content = itemData['contents'];
+        Book book = Book(id, name, description, content);
+        return book;
       case 'food':
         String name = itemData['name'];
         String description = itemData['description'];
@@ -198,7 +239,20 @@ class Atlas {
         Drink drink = Drink(id, name, description, health);
         return drink;
       case 'enemy':
-        break;
+        String name = itemData['name'];
+        String description = itemData['description'];
+        int health = itemData['health'];
+        int damage = itemData['damage'];
+        Enemy enemy = Enemy(id, name, description, health, damage);
+        if (itemData.containsKey('synonyms')) {
+          List<String> synonyms = itemData['synonyms'].cast<String>();
+          enemy.addSynonyms(synonyms);
+        }
+
+        if (itemData.containsKey('takeable')) {
+          enemy.setTakeable(itemData['takeable'] as bool);
+        }
+        return enemy;
       default:
         throw Exception('Invalid item type: $itemType');
     }
@@ -267,9 +321,38 @@ class Atlas {
     return _rooms[roomid]!;
   }
 
-  takeItem(String word, Player player) {
+  dynamic inRoom(String word) {
     Room room = getRoom(_currentRoom);
+    if (room.items.isNotEmpty) {
+      for (var item in room.items) {
+        if (item.isSynonym(word)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  Item? getItem(String word) {
+    Room room = getRoom(_currentRoom);
+    if (room.items.isNotEmpty) {
+      for (var item in room.items) {
+        if (item.isSynonym(word)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  takeItem(String word, Player player) {
+    print('Taking item $word');
+    Room room = getRoom(_currentRoom);
+    print(room.items);
     dynamic item = room.removeItem(word);
+    if (item is String) {
+      return item;
+    }
     if (item != null) {
       if (item is Item) {
         if (player.inventory.addItem(item)) {

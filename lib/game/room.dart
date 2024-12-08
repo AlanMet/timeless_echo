@@ -94,12 +94,25 @@ class Room {
       }
       if (_items[i] is Container) {
         Container container = _items[i] as Container;
-        Item? item = container.removeItemByName(itemName);
-        if (item != null) {
-          return item;
+        if (container.isOpen()) {
+          Item? item = container.removeItemByName(itemName);
+          if (item != null) {
+            return item;
+          }
+        } else {
+          return "The ${container.name} is closed.";
         }
       }
     }
+  }
+
+  bool inRoom(String itemName) {
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i].isSynonym(itemName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Item? getItem(String itemName) {
@@ -141,6 +154,14 @@ class Tutorial extends Room {
 
   Tutorial(super.id, super.name, super.description) {
     _steps = [];
+  }
+
+  get steps => _steps;
+
+  Tutorial.withSteps(int id, String name, String description, List<int> exits,
+      List<String> steps)
+      : super.withExits(id, name, description, exits) {
+    _steps = steps;
   }
 
   Tutorial.withExits(int id, String name, String description, List<int> exits)

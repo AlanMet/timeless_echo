@@ -7,6 +7,7 @@ abstract class IInteractable {
 class Door implements IInteractable {
   bool isOpen = false;
   late String _name;
+  final List<String> _synonyms = [];
 
   get name => _name;
 
@@ -27,6 +28,27 @@ class Door implements IInteractable {
       isOpen = false;
       return "You close the ${_name}.";
     }
+  }
+
+  void addSynonym(String synonym) {
+    _synonyms.add(synonym);
+  }
+
+  void addSynonyms(List<String> synonyms) {
+    _synonyms.addAll(synonyms);
+  }
+
+  bool isSynonym(String word) {
+    if (_name == word) {
+      print("word was found");
+      return true;
+    }
+    if (_synonyms.contains(word)) {
+      print("synonym found");
+      return true;
+    }
+    print("not found.");
+    return false;
   }
 
   List<int> getRooms() {

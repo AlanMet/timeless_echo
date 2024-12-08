@@ -46,6 +46,10 @@ shoot,verb
 inspect,verb
 eat,verb
 drink,verb
+unlock,verb
+crouch,verb
+crawl,verb
+cut,verb
 all,noun
 box,noun
 coins,noun
@@ -69,6 +73,11 @@ bread,noun
 door,noun
 window,noun
 key,noun
+gourde,noun
+old book,noun
+book,noun
+mirror,noun
+beast,noun
 with,preposition
 at,preposition
 to,preposition
@@ -77,4 +86,6 @@ inside,preposition
 under,preposition
 on,preposition
 off,preposition
-the,other
+into,preposition
+through,preposition
+c,other

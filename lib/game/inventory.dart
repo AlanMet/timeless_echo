@@ -31,6 +31,15 @@ class Inventory {
     return _items.contains(item);
   }
 
+  Item? inInventory(String itemName) {
+    for (var item in _items) {
+      if (item.isSynonym(itemName)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
   Item getItem(String itemName) {
     for (var item in _items) {
       if (item.isSynonym(itemName)) {

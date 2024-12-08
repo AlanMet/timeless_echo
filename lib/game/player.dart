@@ -9,7 +9,7 @@ class Player {
   bool crouched = false;
 
   Controller controller = Controller();
-  Inventory _inventory = Inventory();
+  final Inventory _inventory = Inventory();
 
   void takeDamage(int damage) {
     _health -= damage;
@@ -19,7 +19,7 @@ class Player {
   }
 
   String printInventory() {
-    return _inventory.toString();
+    return "Your inventory contains:\n${_inventory.toString()}";
   }
 
   get inventory => _inventory;

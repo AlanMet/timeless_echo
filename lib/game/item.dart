@@ -81,6 +81,10 @@ class Container extends Item {
   Container(int id, String name, String description)
       : super(id, name, description);
 
+  bool isOpen() {
+    return _open;
+  }
+
   void addItem(Item item) {
     _items.add(item);
   }
@@ -147,6 +151,52 @@ class Container extends Item {
     } else {
       return describeItems();
     }
+  }
+}
+
+class Book extends Item {
+  late final String _text;
+
+  Book(int id, String name, String description, this._text)
+      : super(id, name, description);
+
+  String get text => _text;
+
+  String read() {
+    return _text;
+  }
+}
+
+class Enemy extends Item {
+  late final int _health;
+  late final int _damage;
+
+  Enemy(int id, String name, String description, this._health, this._damage)
+      : super(id, name, description);
+
+  String takeDamage(int damage) {
+    _health -= damage;
+    return "The $name took some damage it can still fight.";
+  }
+
+  String healthStatus() {
+    if (_health > 75) {
+      return "The $name looks strong and healthy.";
+    } else if (_health > 50) {
+      return "The $name is slightly wounded.";
+    } else if (_health > 25) {
+      return "The $name is seriously injured.";
+    } else if (_health > 0) {
+      return "The $name is on the brink of death.";
+    } else {
+      return "The $name is dead! Great work!";
+    }
+  }
+
+  int get damage => _damage;
+
+  bool isDead() {
+    return _health <= 0;
   }
 }
 

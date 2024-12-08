@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import 'package:timeless_echo/game/map.dart';
@@ -9,15 +10,15 @@ import 'room.dart';
 import 'interactibles.dart';
 import 'player.dart';
 import 'item.dart';
-import 'inventory.dart';
 
 class Game {
   // Reference to the controller
-  late Controller _controller;
+  late final Controller _controller;
   // Map of words to their types
   Map<String, WordType> vocab = {};
   Atlas map = Atlas();
   Player player = Player();
+  int tutorialFightStep = -2;
 
   Game(this._controller);
 
@@ -32,11 +33,17 @@ class Game {
 
     //items loaded first so rooms can be filled with items straight away.
     Map<int, dynamic> items = await map.loadItems();
+    print(items);
     await map.loadRooms(items);
     Room currentRoom = map.getCurrentRoom();
     print("current room: ${currentRoom.name}");
-    _controller.updateText(currentRoom.describe());
-
+    if (map.currentRoom is Tutorial) {
+      Tutorial tutorial = map.currentRoom as Tutorial;
+      String description = tutorial.describe();
+      printscrn("$description\n\n${tutorial.steps[0]}");
+    } else {
+      printscrn(currentRoom.describe());
+    }
     print("Data loaded...");
     return;
   }
@@ -134,83 +141,114 @@ class Game {
 
     if (commandMap.containsKey(commandTypes)) {
       print("running command: ${commandMap[commandTypes]}");
-      commandMap[commandTypes]!(wordAndType);
+      String output = commandMap[commandTypes]!(wordAndType);
+      postProcess(output);
     } else {
       print("I beg your pardon?");
     }
   }
 
-  void processVerb(List<WordAndType> wordAndType) {
+  void postProcess(String output) {
+    //-2 means the player is unaware of the fight but hasn't started it yet.
+    //-1 means the player is aware of the fight.
+    //0 means the player has started the fight.
+    if (tutorialFightStep == -1) {
+      tutorialFightStep++;
+    }
+    if (tutorialFightStep == 0) {
+      //allow beast to do damage
+      tutorialFightStep++;
+      output += "\nThe beast attacks you! You take 30 damage.";
+      player.takeDamage(30);
+    }
+    printscrn(output);
+  }
+
+  String processVerb(List<WordAndType> wordAndType) {
     print("Processing verb");
     WordAndType verb = wordAndType[0];
     switch (verb.word) {
       case "stop":
-        printscrn("Pulse stopped");
-        break;
+        return "Pulse stopped";
       case "lightmode":
         _controller.theme.toggleTheme(false);
-        printscrn("Light mode activated");
-        break;
+        return "Light mode activated";
       case "darkmode":
         _controller.theme.toggleTheme(true);
-        print("Dark mode activated");
-        break;
+        return "Dark mode activated";
       case "crouch":
         player.crouched = true;
-        printscrn("You crouch down");
+        String output = "You crouch down";
         //if room is room number 1, printscrn("You see a mirror below the bed. It looks like there is another world through it.");
-        break;
+        if (map.getCurrentRoom().id == 20) {
+          output +=
+              "\nYou see a mirror below the bed. It looks like there is another world through it.";
+        }
+        return output;
+      case "stand":
+        player.crouched = false;
+        return "You stand up";
       case "i":
       case "inv":
       case "inventory":
-        printscrn(player.printInventory());
-        break;
+        if (map.currentRoom is Tutorial) {
+          Tutorial tutorial = map.currentRoom as Tutorial;
+          if (tutorial.id == 0) {
+            return "${player.printInventory()}\n${tutorial.steps[2]}";
+          }
+        }
+        return player.printInventory();
       case "describe":
       case "look":
         //needs modifying.
-        printscrn(map.getCurrentRoom().description);
-        break;
+        //if room is number 1 return
+        if (map.currentRoom is Tutorial) {
+          Tutorial tutorial = map.currentRoom as Tutorial;
+          if (tutorial.id == 1) {
+            tutorialFightStep++;
+            return "${tutorial.steps[1]}";
+          }
+        }
+        return map.getCurrentRoom().description;
       case "north":
       case "n":
-        printscrn(map.move("north"));
-        break;
+        if (map.currentRoom is Tutorial) {
+          Tutorial tutorial = map.currentRoom as Tutorial;
+          if (tutorial.id == 0) {
+            String output = map.move("north");
+            Tutorial tutorial = map.currentRoom as Tutorial;
+            return "$output\n${tutorial.steps[0]}";
+          }
+        }
+        return map.move("north");
       case "northeast":
       case "ne":
-        printscrn(map.move("northeast"));
-        break;
+        return map.move("northeast");
       case "northwest":
       case "nw":
-        printscrn(map.move("northwest"));
-        break;
+        return map.move("northwest");
       case "south":
       case "s":
-        printscrn(map.move("south"));
-        break;
+        return map.move("south");
       case "southwest":
       case "sw":
-        printscrn(map.move("southwest"));
-        break;
+        return map.move("southwest");
       case "southeast":
       case "se":
-        printscrn(map.move("southeast"));
-        break;
+        return map.move("southeast");
       case "west":
       case "w":
-        printscrn(map.move("west"));
-        break;
+        return map.move("west");
       case "east":
       case "e":
-        printscrn(map.move("east"));
-        break;
+        return map.move("east");
       case "climb":
       case "up":
       case "u":
-        printscrn(map.move("up"));
-        break;
+        return map.move("up");
       case "down":
       case "d":
-        printscrn(map.move("down"));
-        break;
+        return map.move("down");
       case "run":
         print("running.");
         List<int> exits = map.getCurrentRoom().getExits();
@@ -231,93 +269,120 @@ class Game {
         while (exits[index] == -1) {
           index = random.nextInt(exits.length);
         }
-        printscrn(map.move(directions[index]));
-        break;
+        return map.move(directions[index]);
       default:
-        printscrn("Sorry I can't ${verb.word}");
-        break;
+        return "Sorry I can't ${verb.word}";
     }
   }
 
-  void processVerbNoun(List<WordAndType> wordAndType) {
+  String processVerbNoun(List<WordAndType> wordAndType) {
+    if (wordAndType.length < 2) {
+      return "Invalid command. Please provide both a verb and a noun.";
+    }
+
     print("Processing verb and noun");
     WordAndType verb = wordAndType[0];
     WordAndType noun = wordAndType[1];
+
     switch (verb.word) {
-      case "take":
-        printscrn(map.takeItem(noun.word, player));
-        break;
       case "read":
-        printscrn("You read the ${noun.word}");
-        break;
+        for (Item item in player.inventory.items) {
+          if (item.isSynonym(noun.word)) {
+            if (item is Book) {
+              return item.read();
+            } else {
+              return "You can't read a ${item.name}.";
+            }
+          }
+        }
+        return "You don't have a ${noun.word}.";
+      case "take":
+        if (map.currentRoom is Tutorial) {
+          Tutorial tutorial = map.currentRoom as Tutorial;
+          if (tutorial.id == 0 && noun.word == "sword") {
+            map.takeItem(noun.word, player);
+            return tutorial.steps[1];
+          }
+        }
+        return map.takeItem(noun.word, player);
       case "drop":
-        Inventory inventory = player.inventory;
-        Item? item = inventory.removeItem(noun.word);
+        Item? item = player.inventory.removeItem(noun.word);
         if (item != null) {
           map.getCurrentRoom().addItem(item);
-          printscrn("You drop the ${item.name}");
-        } else {
-          printscrn("You don't have a ${noun.word}");
+          return "You drop the ${item.name}.";
         }
-        break;
+        return "You don't have a ${noun.word}.";
       case "open":
-        if (map.getCurrentRoom() is InteractableRoom) {
-          interactDoor(noun, flag: true);
-        } else {
-          interactContainer(noun, flag: true);
-        }
-        break;
       case "close":
+        bool isOpenAction = (verb.word == "open");
         if (map.getCurrentRoom() is InteractableRoom) {
-          interactDoor(noun, flag: false);
-        } else {
-          interactContainer(noun, flag: false);
+          return interactDoor(noun, flag: isOpenAction);
         }
-        break;
+        return interactContainer(noun, flag: isOpenAction);
       case "unlock":
-        printscrn("You unlock the ${noun.word}");
-        break;
+        return "You unlock the ${noun.word}.";
       case "examine":
-        printscrn("You examine the ${noun.word}");
-        break;
+        return "You examine the ${noun.word}.";
       case "use":
-        printscrn("You use the ${noun.word}");
-        break;
+        return "You use the ${noun.word}.";
       case "go":
       case "move":
       case "walk":
-        printscrn("You go to the ${noun.word}");
-        break;
+        return "You go to the ${noun.word}.";
       case "inspect":
-        printscrn("You inspect the ${noun.word}");
-        break;
+        return "You inspect the ${noun.word}.";
       case "eat":
-        printscrn(player.eat(noun.word));
-        break;
       case "drink":
-        printscrn(player.eat(noun.word));
-        break;
+        return player.eat(noun.word);
+      case "climb":
+        return _processClimb(noun);
       default:
-        printscrn("Sorry I don't know how to ${verb.word} a ${noun.word}");
-        break;
+        return "Sorry, I don't know how to '${verb.word}' a '${noun.word}'.";
     }
   }
 
-  void interactContainer(WordAndType noun, {bool flag = true}) {
+  String _processClimb(WordAndType noun) {
+    const directions = [
+      "north",
+      "northeast",
+      "east",
+      "southeast",
+      "south",
+      "southwest",
+      "west",
+      "northwest",
+      "up",
+      "down"
+    ];
+
+    var currentRoom = map.getCurrentRoom();
+    if (currentRoom is InteractableRoom) {
+      for (int i = 0; i < currentRoom.interactables.length; i++) {
+        if (currentRoom.interactables[i] != -1) {
+          var door = map.floatingItems[currentRoom.interactables[i]];
+          if (door.isSynonym(noun.word)) {
+            return map.move(directions[i]);
+          }
+        }
+      }
+    }
+    return "You don't see a door to climb.";
+  }
+
+  String interactContainer(WordAndType noun, {bool flag = true}) {
     Item? item = map.getCurrentRoom().getItem(noun.word);
-    printscrn(item.toString());
     if (item != null && item is Container) {
       if (flag) {
-        printscrn(item.open());
+        return item.open();
       } else {
-        printscrn(item.close());
+        return item.close();
       }
     } else {
-      printscrn("You don't see a ${noun.word} to open");
+      return "You don't see a ${noun.word} to open";
     }
   }
 
-  void interactDoor(WordAndType noun, {bool flag = true}) {
+  String interactDoor(WordAndType noun, {bool flag = true}) {
     InteractableRoom room = map.getCurrentRoom() as InteractableRoom;
     for (int interactable in room.interactables) {
       if (interactable != -1) {
@@ -329,26 +394,23 @@ class Game {
         switch (type) {
           case 'Door':
             Door thing = door as Door;
-            printscrn(thing.interact(flag));
-            break;
+            return thing.interact(flag);
           case 'LockedDoor':
             LockedDoor thing = door as LockedDoor;
-            printscrn(thing.interact(flag));
-            break;
+            return thing.interact(flag);
           case 'Trapdoor':
             Trapdoor thing = door as Trapdoor;
-            printscrn(thing.interact(flag));
-            break;
+            return thing.interact(flag);
           default:
             print("runtime type: $type");
-            printscrn("You don't see a door to open");
             break;
         }
       }
     }
+    return "You don't see a door to open";
   }
 
-  void processVerbVerb(List<WordAndType> wordAndType) {
+  String processVerbVerb(List<WordAndType> wordAndType) {
     WordAndType verb1 = wordAndType[0];
     WordAndType verb2 = wordAndType[1];
 
@@ -359,66 +421,90 @@ class Game {
         switch (verb2.word) {
           case "north":
           case "n":
+            if (map.currentRoom is Tutorial) {
+              Tutorial tutorial = map.currentRoom as Tutorial;
+              if (tutorial.id == 0) {
+                String output = map.move("north");
+                Tutorial tutorial = map.currentRoom as Tutorial;
+                return "$output\n${tutorial.steps[0]}";
+              }
+            }
             print("moving north");
-            printscrn(map.move("north"));
-
-            break;
+            return map.move("north");
           case "northeast":
           case "ne":
-            printscrn(map.move("northeast"));
-            break;
+            return map.move("northeast");
           case "northwest":
           case "nw":
-            printscrn(map.move("northwest"));
-            break;
+            return map.move("northwest");
           case "south":
           case "s":
-            printscrn(map.move("south"));
-            break;
+            return map.move("south");
           case "southwest":
           case "sw":
-            printscrn(map.move("southwest"));
-            break;
+            return map.move("southwest");
           case "southeast":
           case "se":
-            printscrn(map.move("southeast"));
-            break;
+            return map.move("southeast");
           case "west":
           case "w":
-            printscrn(map.move("west"));
-            break;
+            return map.move("west");
           case "east":
           case "e":
-            printscrn(map.move("east"));
-            break;
+            return map.move("east");
           case "climb":
           case "up":
           case "u":
-            printscrn(map.move("up"));
-            break;
+            return map.move("up");
           case "down":
           case "d":
-            printscrn(map.move("down"));
-            break;
+            return map.move("down");
           default:
-            printscrn("Sorry I don't know how to ${verb1.word} ${verb2.word}");
-            break;
+            return "Sorry I don't know how to ${verb1.word} ${verb2.word}";
         }
       default:
-        printscrn("Sorry I don't know how to ${verb1.word} ${verb2.word}");
-        break;
+        return "Sorry I don't know how to ${verb1.word} ${verb2.word}";
     }
   }
 
-  void processVerbVerbVerb(List<WordAndType> wordAndType) {
-    printscrn("Processing verb and verb and verb");
+  String processVerbVerbVerb(List<WordAndType> wordAndType) {
+    return "Processing verb and verbreturn";
   }
 
-  void processVerbPrepositionNoun(List<WordAndType> wordAndType) {
-    printscrn("Processing verb preposition noun");
+  String processVerbPrepositionNoun(List<WordAndType> wordAndType) {
+    print("Processing verb preposition noun");
+    WordAndType verb = wordAndType[0];
+    WordAndType preposition = wordAndType[1];
+    WordAndType noun = wordAndType[2];
+    switch (verb.word) {
+      case "crawl":
+        if (preposition.word == "through" || preposition.word == "into") {
+          if (noun.word == "mirror") {
+            if (!player.crouched) {
+              return "You don't see a mirror to crawl through";
+            }
+            String output = "You crawl through the mirror";
+            if (map.getCurrentRoom().id == 20) {
+              map.setRoom(21);
+              return output += map.getCurrentRoom().describe();
+            } else {
+              return "You can't crawl through that";
+            }
+          } else {
+            return "You can't crawl through that";
+          }
+        } else {
+          return "You can't crawl ${preposition.word} that";
+        }
+      default:
+        return "Sorry I don't know how to ${verb.word} ${preposition.word} ${noun.word}";
+    }
   }
 
-  void processVerbNounPrepositionNoun(List<WordAndType> wordAndType) {
+  String processVerbNounPrepositionNoun(List<WordAndType> wordAndType) {
+    if (wordAndType.length < 4) {
+      return "That command is too short!";
+    }
     //print("Processing verb noun preposition noun");
     //open door with key
     WordAndType verb = wordAndType[0];
@@ -446,12 +532,10 @@ class Game {
                   int keyid = thing.requiredKey;
                   Item? key = player.inventory.getItem(noun2.word);
                   if (key != null && key.id == keyid) {
-                    printscrn(thing.unlock(keyid));
                     player.inventory.removeItem(noun2.word);
-                    return;
+                    return thing.unlock(keyid);
                   } else {
-                    printscrn("You don't have the correct key");
-                    return;
+                    return "You don't have the correct key";
                   }
                 default:
                   // no printscrn because in loop
@@ -460,11 +544,31 @@ class Game {
               }
             }
           }
-          printscrn("You don't see a ${noun2} to open");
+          return "You don't see a $noun2 to open";
         } else {
-          printscrn("You don't see a ${noun2} to open");
+          return "You don't see a $noun2 to open";
         }
-        break;
+      case "cut":
+        //check if noun1 is a beast synonym and noun2 is a sword synonym and is in inventory
+        //check if beast is in room. and is synonym
+        //check if sword is in inventory and is synonym
+        //if all true, cut beast with sword
+        var beast = map.getCurrentRoom().getItem(noun1.word);
+        var sword = player.inventory.inInventory(noun2.word);
+        if (beast == null) {
+          return "You don't see a ${noun1.word} to cut";
+        }
+        if (sword == null) {
+          return "You don't have a ${noun2.word} to cut with";
+        }
+
+        if (beast is Enemy && sword is Weapon) {
+          return beast.takeDamage(sword.damage);
+        }
+        return "You can't cut ${noun1.word} with ${noun2.word}";
+
+      default:
+        return "Sorry I don't know how to ${verb.word} ${noun1.word} ${noun2.word}";
     }
   }
 }
