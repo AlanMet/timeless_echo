@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Item {
   late final int _id;
   late final String _name;
@@ -168,15 +170,17 @@ class Book extends Item {
 }
 
 class Enemy extends Item {
-  late final int _health;
-  late final int _damage;
+  late int _health;
+  late int _damage;
 
   Enemy(int id, String name, String description, this._health, this._damage)
       : super(id, name, description);
 
+  get health => _health;
+
   String takeDamage(int damage) {
     _health -= damage;
-    return "The $name took some damage it can still fight.";
+    return healthStatus();
   }
 
   String healthStatus() {

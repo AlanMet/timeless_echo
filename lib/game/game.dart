@@ -154,12 +154,18 @@ class Game {
     //0 means the player has started the fight.
     if (tutorialFightStep == -1) {
       tutorialFightStep++;
-    }
-    if (tutorialFightStep == 0) {
+    } else if (tutorialFightStep == 0) {
       //allow beast to do damage
       tutorialFightStep++;
       output += "\nThe beast attacks you! You take 30 damage.";
       player.takeDamage(30);
+    }
+
+    if (player.health == 100 &&
+        map.getCurrentRoom() is Tutorial &&
+        map.getCurrentRoom().id == 2) {
+      Tutorial tutorial = map.getCurrentRoom() as Tutorial;
+      output += tutorial.steps[3];
     }
     printscrn(output);
   }
@@ -212,6 +218,7 @@ class Game {
         return map.getCurrentRoom().description;
       case "north":
       case "n":
+        //need to add this logic to the move function to reduce repetitiveness
         if (map.currentRoom is Tutorial) {
           Tutorial tutorial = map.currentRoom as Tutorial;
           if (tutorial.id == 0) {
@@ -241,6 +248,14 @@ class Game {
         return map.move("west");
       case "east":
       case "e":
+        if (map.currentRoom is Tutorial) {
+          Tutorial tutorial = map.currentRoom as Tutorial;
+          if (tutorial.id == 1) {
+            String output = map.move("east");
+            Tutorial tutorial = map.currentRoom as Tutorial;
+            return "$output\n${tutorial.steps[0]}";
+          }
+        }
         return map.move("east");
       case "climb":
       case "up":
@@ -297,14 +312,18 @@ class Game {
         }
         return "You don't have a ${noun.word}.";
       case "take":
+        String output = map.takeItem(noun.word, player);
         if (map.currentRoom is Tutorial) {
           Tutorial tutorial = map.currentRoom as Tutorial;
           if (tutorial.id == 0 && noun.word == "sword") {
-            map.takeItem(noun.word, player);
-            return tutorial.steps[1];
+            output += tutorial.steps[1];
+          } else if (tutorial.id == 2 &&
+              player.inventory.inInventory("bread") != null &&
+              player.inventory.inInventory("gourde") != null) {
+            output += tutorial.steps[2];
           }
         }
-        return map.takeItem(noun.word, player);
+        return output;
       case "drop":
         Item? item = player.inventory.removeItem(noun.word);
         if (item != null) {
@@ -318,7 +337,15 @@ class Game {
         if (map.getCurrentRoom() is InteractableRoom) {
           return interactDoor(noun, flag: isOpenAction);
         }
-        return interactContainer(noun, flag: isOpenAction);
+        Room currentRoom = map.getCurrentRoom();
+        String output = interactContainer(noun, flag: isOpenAction);
+        if (currentRoom is Tutorial) {
+          Tutorial tutorial = currentRoom as Tutorial;
+          if (tutorial.id == 2 && noun.word == "cabinet") {
+            output += "\n${tutorial.steps[1]}";
+          }
+        }
+        return output;
       case "unlock":
         return "You unlock the ${noun.word}.";
       case "examine":
@@ -451,6 +478,14 @@ class Game {
             return map.move("west");
           case "east":
           case "e":
+            if (map.currentRoom is Tutorial) {
+              Tutorial tutorial = map.currentRoom as Tutorial;
+              if (tutorial.id == 1) {
+                String output = map.move("east");
+                Tutorial tutorial = map.currentRoom as Tutorial;
+                return "$output\n${tutorial.steps[0]}";
+              }
+            }
             return map.move("east");
           case "climb":
           case "up":
@@ -563,7 +598,12 @@ class Game {
         }
 
         if (beast is Enemy && sword is Weapon) {
-          return beast.takeDamage(sword.damage);
+          String output = beast.takeDamage(sword.damage);
+          if (beast.health <= 0 && map.getCurrentRoom() is Tutorial) {
+            Tutorial tutorial = map.getCurrentRoom() as Tutorial;
+            output += tutorial.steps[2];
+          }
+          return output;
         }
         return "You can't cut ${noun1.word} with ${noun2.word}";
 

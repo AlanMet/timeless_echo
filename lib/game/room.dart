@@ -166,4 +166,9 @@ class Tutorial extends Room {
 
   Tutorial.withExits(int id, String name, String description, List<int> exits)
       : super.withExits(id, name, description, exits);
+
+  @override
+  String describe() {
+    return "$_name\n$_description\n";
+  }
 }
