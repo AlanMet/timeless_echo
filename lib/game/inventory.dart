@@ -56,7 +56,7 @@ class Inventory {
     }
     String result = '';
     for (var item in _items) {
-      result += item.name + '\n';
+      result += '${item.name}\n';
     }
     return result;
   }

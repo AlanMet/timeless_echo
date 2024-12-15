@@ -1,8 +1,9 @@
-import 'interactibles.dart';
+import 'dart:developer' as developer;
 import 'item.dart';
 import 'helpers.dart';
 
 class Room {
+  // ignore: prefer_final_fields
   late int _id;
   late final String _name;
   late final String _description;
@@ -77,7 +78,7 @@ class Room {
     if (_items.isNotEmpty) {
       output += "The room contains: ";
       for (var item in _items) {
-        output += item.name + ", ";
+        output += "${item.name}, ";
       }
     }
     return output;
@@ -89,7 +90,7 @@ class Room {
     }
     for (var i = 0; i < _items.length; i++) {
       if (_items[i].isSynonym(itemName)) {
-        print("found item");
+        developer.log("found item");
         return _items.removeAt(i);
       }
       if (_items[i] is Container) {
@@ -145,8 +146,8 @@ class InteractableRoom extends Room {
   InteractableRoom(super.id, super.name, super.description);
 
   InteractableRoom.withExits(
-      int id, String name, String description, List<int> exits)
-      : super.withExits(id, name, description, exits);
+      super.id, super.name, super.description, super.exits)
+      : super.withExits();
 }
 
 class Tutorial extends Room {
@@ -158,14 +159,14 @@ class Tutorial extends Room {
 
   get steps => _steps;
 
-  Tutorial.withSteps(int id, String name, String description, List<int> exits,
-      List<String> steps)
-      : super.withExits(id, name, description, exits) {
+  Tutorial.withSteps(
+      super.id, super.name, super.description, super.exits, List<String> steps)
+      : super.withExits() {
     _steps = steps;
   }
 
-  Tutorial.withExits(int id, String name, String description, List<int> exits)
-      : super.withExits(id, name, description, exits);
+  Tutorial.withExits(super.id, super.name, super.description, super.exits)
+      : super.withExits();
 
   @override
   String describe() {

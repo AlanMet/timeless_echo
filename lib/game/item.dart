@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 
 class Item {
   late final int _id;
@@ -41,14 +41,14 @@ class Item {
 
   bool isSynonym(String word) {
     if (_name == word) {
-      print("word was found");
+      developer.log("$word was found");
       return true;
     }
     if (_synonyms.contains(word)) {
-      print("synonym found");
+      developer.log("$word synonym found");
       return true;
     }
-    print("not found.");
+    developer.log("not found.");
     return false;
   }
 }
@@ -56,32 +56,29 @@ class Item {
 class Food extends Item {
   late final int _health;
 
-  Food(int id, String name, String description, this._health)
-      : super(id, name, description);
+  Food(super.id, super.name, super.description, this._health);
 
   int get health => _health;
 }
 
 class Drink extends Food {
-  Drink(int id, String name, String description, int health)
-      : super(id, name, description, health);
+  Drink(super.id, super.name, super.description, super.health);
 }
 
 class Weapon extends Item {
   late final int _damage;
 
-  Weapon(int id, String name, String description, this._damage)
-      : super(id, name, description);
+  Weapon(super.id, super.name, super.description, this._damage);
 
   int get damage => _damage;
 }
 
 class Container extends Item {
+  // ignore: prefer_final_fields
   late List<Item> _items = [];
   late bool _open = false;
 
-  Container(int id, String name, String description)
-      : super(id, name, description);
+  Container(super.id, super.name, super.description);
 
   bool isOpen() {
     return _open;
@@ -138,7 +135,7 @@ class Container extends Item {
       }
       String items = "The $_name contains: ";
       for (var item in _items) {
-        items += item._name + ", ";
+        items += "${item._name}, ";
       }
       return items;
     } else {
@@ -159,8 +156,7 @@ class Container extends Item {
 class Book extends Item {
   late final String _text;
 
-  Book(int id, String name, String description, this._text)
-      : super(id, name, description);
+  Book(super.id, super.name, super.description, this._text);
 
   String get text => _text;
 
@@ -171,10 +167,13 @@ class Book extends Item {
 
 class Enemy extends Item {
   late int _health;
+  // ignore: prefer_final_fields
   late int _damage;
 
-  Enemy(int id, String name, String description, this._health, this._damage)
-      : super(id, name, description);
+  bool discovered = false;
+  bool started = false;
+
+  Enemy(super.id, super.name, super.description, this._health, this._damage);
 
   get health => _health;
 

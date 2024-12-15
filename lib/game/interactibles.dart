@@ -1,4 +1,5 @@
 import 'item.dart';
+import 'dart:developer' as developer;
 
 abstract class IInteractable {
   String interact(bool flag);
@@ -11,6 +12,7 @@ class Door implements IInteractable {
 
   get name => _name;
 
+  // ignore: prefer_final_fields
   List<int> _rooms = [];
 
   Door(String name, int room1, int room2) {
@@ -23,10 +25,10 @@ class Door implements IInteractable {
   String interact(bool flag) {
     if (flag) {
       isOpen = true;
-      return "You open the ${_name}.";
+      return "You open the $_name.";
     } else {
       isOpen = false;
-      return "You close the ${_name}.";
+      return "You close the $_name.";
     }
   }
 
@@ -40,14 +42,14 @@ class Door implements IInteractable {
 
   bool isSynonym(String word) {
     if (_name == word) {
-      print("word was found");
+      developer.log("word was found");
       return true;
     }
     if (_synonyms.contains(word)) {
-      print("synonym found");
+      developer.log("synonym found");
       return true;
     }
-    print("not found.");
+    developer.log("not found.");
     return false;
   }
 
@@ -71,13 +73,13 @@ class LockedDoor extends Door {
   String interact(bool flag) {
     if (flag) {
       if (isLocked) {
-        return "The ${_name} is locked. You need the correct key.";
+        return "The $_name is locked. You need the correct key.";
       } else {
         return super.interact(flag);
       }
     } else {
       if (!isOpen) {
-        return "The ${_name} is already closed.";
+        return "The $_name is already closed.";
       } else {
         return super.interact(flag);
       }
@@ -87,7 +89,7 @@ class LockedDoor extends Door {
   String unlock(int keyId) {
     if (keyId == requiredKey) {
       isLocked = false;
-      return "You unlock the ${_name}.";
+      return "You unlock the $_name.";
     } else {
       return "The key doesn't fit.";
     }
@@ -105,6 +107,7 @@ class Rug implements IInteractable {
   }
 }
 
+//used to differentiate between doors and trapdoors
 class Trapdoor extends Door {
-  Trapdoor(String name, int room1, int room2) : super(name, room1, room2);
+  Trapdoor(super.name, super.room1, super.room2);
 }

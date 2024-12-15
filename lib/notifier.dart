@@ -11,7 +11,7 @@ class Controller extends ChangeNotifier {
   late Game game;
   String _text = 'Initializing...';
   String get text => _text;
-  List<String> _history = [];
+  final List<String> _history = [];
   List<String> get history => _history;
   final CustomTheme _theme = CustomTheme();
   CustomTheme get theme => _theme;

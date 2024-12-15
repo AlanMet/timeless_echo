@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:timeless_echo/main.dart';
 import 'package:timeless_echo/notifier.dart';
 
 class TextInput extends StatefulWidget {

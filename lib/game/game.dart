@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import 'package:timeless_echo/game/map.dart';
@@ -18,8 +17,6 @@ class Game {
   Map<String, WordType> vocab = {};
   Atlas map = Atlas();
   Player player = Player();
-  int tutorialFightStep = -2;
-
   Game(this._controller);
 
   void printscrn(String message) {
@@ -28,15 +25,15 @@ class Game {
   }
 
   Future<void> loadData() async {
-    print("Loading data...");
+    developer.log("Loading data...");
     await loadDictionary();
 
     //items loaded first so rooms can be filled with items straight away.
     Map<int, dynamic> items = await map.loadItems();
-    print(items);
+    developer.log(items.toString());
     await map.loadRooms(items);
     Room currentRoom = map.getCurrentRoom();
-    print("current room: ${currentRoom.name}");
+    developer.log("current room: ${currentRoom.name}");
     if (map.currentRoom is Tutorial) {
       Tutorial tutorial = map.currentRoom as Tutorial;
       String description = tutorial.describe();
@@ -44,10 +41,16 @@ class Game {
     } else {
       printscrn(currentRoom.describe());
     }
-    print("Data loaded...");
+    developer.log("Data loaded...");
     return;
   }
 
+  /// - Load the dictionary of words and their types
+  /// - The dictionary is a CSV file with the following format:
+  /// - word, type
+  /// - where type is one of the following:
+  /// - noun, verb, adjective, determiner, pronoun, preposition
+  /// - If the type is not one of the above, it is considered "other"
   Future<void> loadDictionary() async {
     String contents = "";
     try {
@@ -122,8 +125,8 @@ class Game {
   }
 
   void runCommand(List<WordAndType> wordAndType) {
-    print("Running command");
-    print(map.getCurrentRoom().id);
+    developer.log("Running command");
+    developer.log("${map.getCurrentRoom().id}");
     Map<String, Function(List<WordAndType>)> commandMap = {
       '[WordType.verb]': processVerb,
       '[WordType.verb, WordType.noun]': processVerbNoun,
@@ -137,30 +140,35 @@ class Game {
     String commandTypes =
         wordAndType.map((word) => word.type.toString()).toList().toString();
 
-    print(commandTypes);
+    developer.log(commandTypes);
 
     if (commandMap.containsKey(commandTypes)) {
-      print("running command: ${commandMap[commandTypes]}");
+      developer.log("running command: ${commandMap[commandTypes]}");
       String output = commandMap[commandTypes]!(wordAndType);
       postProcess(output);
     } else {
-      print("I beg your pardon?");
+      developer.log("I beg your pardon?");
     }
   }
 
   void postProcess(String output) {
-    //-2 means the player is unaware of the fight but hasn't started it yet.
-    //-1 means the player is aware of the fight.
-    //0 means the player has started the fight.
-    if (tutorialFightStep == -1) {
-      tutorialFightStep++;
-    } else if (tutorialFightStep == 0) {
-      //allow beast to do damage
-      tutorialFightStep++;
-      output += "\nThe beast attacks you! You take 30 damage.";
-      player.takeDamage(30);
-    }
+    //if there is an enemy in the room
+    //if the enemy is discovered
+    //stared = true
+    //if started = true
+    //allow it to cause damage
 
+    var items = map.getCurrentRoom().items;
+    for (var item in items) {
+      if (item is Enemy) {
+        if (item.discovered) {
+          item.started = true;
+        } else if (item.started) {
+          output += "\nThe beast attacks you! You take 30 damage.";
+          player.takeDamage(30);
+        }
+      }
+    }
     if (player.health == 100 &&
         map.getCurrentRoom() is Tutorial &&
         map.getCurrentRoom().id == 2) {
@@ -171,7 +179,7 @@ class Game {
   }
 
   String processVerb(List<WordAndType> wordAndType) {
-    print("Processing verb");
+    developer.log("Processing verb");
     WordAndType verb = wordAndType[0];
     switch (verb.word) {
       case "stop":
@@ -211,7 +219,13 @@ class Game {
         if (map.currentRoom is Tutorial) {
           Tutorial tutorial = map.currentRoom as Tutorial;
           if (tutorial.id == 1) {
-            tutorialFightStep++;
+            //check if item is an enemy
+            //if it is, discovery = true
+            //if it isn't, return room description
+            Item? beast = map.getCurrentRoom().getItem("beast");
+            if (beast != null && beast is Enemy) {
+              beast.discovered = true;
+            }
             return "${tutorial.steps[1]}";
           }
         }
@@ -265,7 +279,7 @@ class Game {
       case "d":
         return map.move("down");
       case "run":
-        print("running.");
+        developer.log("running.");
         List<int> exits = map.getCurrentRoom().getExits();
         List<String> directions = [
           "north",
@@ -295,7 +309,7 @@ class Game {
       return "Invalid command. Please provide both a verb and a noun.";
     }
 
-    print("Processing verb and noun");
+    developer.log("Processing verb and noun");
     WordAndType verb = wordAndType[0];
     WordAndType noun = wordAndType[1];
 
@@ -340,6 +354,7 @@ class Game {
         Room currentRoom = map.getCurrentRoom();
         String output = interactContainer(noun, flag: isOpenAction);
         if (currentRoom is Tutorial) {
+          // ignore: unnecessary_cast
           Tutorial tutorial = currentRoom as Tutorial;
           if (tutorial.id == 2 && noun.word == "cabinet") {
             output += "\n${tutorial.steps[1]}";
@@ -429,7 +444,7 @@ class Game {
             Trapdoor thing = door as Trapdoor;
             return thing.interact(flag);
           default:
-            print("runtime type: $type");
+            developer.log("runtime type: $type");
             break;
         }
       }
@@ -456,7 +471,7 @@ class Game {
                 return "$output\n${tutorial.steps[0]}";
               }
             }
-            print("moving north");
+            developer.log("moving north");
             return map.move("north");
           case "northeast":
           case "ne":
@@ -507,7 +522,7 @@ class Game {
   }
 
   String processVerbPrepositionNoun(List<WordAndType> wordAndType) {
-    print("Processing verb preposition noun");
+    developer.log("Processing verb preposition noun");
     WordAndType verb = wordAndType[0];
     WordAndType preposition = wordAndType[1];
     WordAndType noun = wordAndType[2];
@@ -574,7 +589,7 @@ class Game {
                   }
                 default:
                   // no printscrn because in loop
-                  print("No door.");
+                  developer.log("No door.");
                   break;
               }
             }
