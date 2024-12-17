@@ -13,24 +13,25 @@ class CustomTheme {
     }
   }
 
+  // Updated color scheme with more refined colors, no new logic added
   ColorScheme get _colorScheme => _isDark
       ? const ColorScheme.dark(
-          primary: Colors.blueGrey,
-          secondary: Colors.orange,
-          tertiary: Color.fromARGB(255, 196, 196, 196),
-          surface: Color.fromARGB(255, 34, 40, 49),
-          onSurface: Colors.white,
-          onPrimary: Colors.white,
-          onSecondary: Colors.black,
+          primary: Color(0xFF4A148C), // Rich purple, more sophisticated
+          secondary: Color(0xFFFF5722), // Vibrant orange, energetic
+          tertiary: Color(0xFFB0BEC5), // Soft grey for tertiary (muted)
+          surface: Color(0xFF121212), // Deep dark surface
+          onSurface: Colors.white, // White text on dark surfaces
+          onPrimary: Colors.white, // White text on primary
+          onSecondary: Colors.black, // Black text on secondary elements
         )
       : const ColorScheme.light(
-          primary: Colors.blue,
-          secondary: Colors.orange,
-          tertiary: Colors.black,
-          surface: Color.fromARGB(40, 40, 41, 255),
-          onSurface: Colors.black,
-          onPrimary: Colors.black,
-          onSecondary: Colors.white,
+          primary: Color(0xFF1976D2), // Clean and vibrant blue
+          secondary: Color(0xFFFF9800), // Warm orange for contrast
+          tertiary: Colors.black87, // Black text color, easier readability
+          surface: Color(0xFFF5F5F5), // Light grey background
+          onSurface: Colors.black, // Black text on light surfaces
+          onPrimary: Colors.black, // Black text on primary
+          onSecondary: Colors.white, // White text on secondary
         );
 
   ThemeData get theme {

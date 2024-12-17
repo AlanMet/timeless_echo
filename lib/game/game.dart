@@ -162,11 +162,13 @@ class Game {
     var items = map.getCurrentRoom().items;
     for (var item in items) {
       if (item is Enemy) {
+        if (item.started && item.health > 0) {
+          output += "\nThe beast attacks you! You take ${item.damage} damage.";
+          player.takeDamage(item.damage);
+        }
         if (item.discovered) {
           item.started = true;
-        } else if (item.started) {
-          output += "\nThe beast attacks you! You take 30 damage.";
-          player.takeDamage(30);
+          developer.log("beast started");
         }
       }
     }
@@ -226,6 +228,7 @@ class Game {
             Item? beast = map.getCurrentRoom().getItem("beast");
             if (beast != null && beast is Enemy) {
               beast.discovered = true;
+              developer.log("beast discovered");
             }
             return "${tutorial.steps[1]}";
           }

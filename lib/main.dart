@@ -61,6 +61,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Timeless Echo',
+      debugShowCheckedModeBanner: false,
       home: MainPage(),
     );
   }

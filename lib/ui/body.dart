@@ -31,7 +31,7 @@ class _BodyState extends State<Body> {
                   flex: 1,
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.fromLTRB(120, 0, 0, 0),
                       child: TypingText(
                         text: controller.text,
                         uiController: controller,

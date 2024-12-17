@@ -77,6 +77,10 @@ flutter:
   assets:
     - "assets/words.csv"
     - "assets/images/icon.png"
+    - "assets/images/image.png"
+    - "assets/images/empty.png"
+    - "assets/images/half.png"
+    - "assets/images/full.png"
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

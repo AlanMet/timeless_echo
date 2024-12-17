@@ -40,7 +40,6 @@ class _TypingTextState extends State<TypingText> {
 
   void _typeText() {
     _typingTimer?.cancel();
-
     _typingTimer = Timer.periodic(widget.speed, (timer) {
       if (_currentText.length < widget.text.length) {
         setState(() {
@@ -60,11 +59,17 @@ class _TypingTextState extends State<TypingText> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      _currentText,
-      style: TextStyle(
+    return Container(
+      alignment: Alignment.centerLeft, // Align the text to the left
+      child: Text(
+        _currentText,
+        style: TextStyle(
           fontSize: 24,
-          color: widget.uiController.theme.theme.colorScheme.tertiary),
+          color: widget.uiController.theme.theme.colorScheme.tertiary,
+        ),
+        overflow: TextOverflow.visible, // No overflow issues
+        textAlign: TextAlign.left, // Ensure text starts from the left
+      ),
     );
   }
 }

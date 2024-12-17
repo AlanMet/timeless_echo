@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'health_bar.dart';
+import 'theme_toggle.dart';
 
 class TopBar extends StatefulWidget {
   const TopBar({super.key});
@@ -14,9 +16,9 @@ class _TopBarState extends State<TopBar> {
     return Container(
       child: Row(
         children: [
-          const Expanded(flex: 3, child: Placeholder()),
-          if (screenWidth > 900) const Expanded(flex: 3, child: Placeholder()),
-          const Expanded(flex: 3, child: Placeholder()),
+          const Expanded(flex: 3, child: HealthWidget()),
+          if (screenWidth > 900) Expanded(flex: 3, child: Container()),
+          const Expanded(flex: 3, child: ThemeToggleWidget()),
         ],
       ),
     );

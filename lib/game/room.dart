@@ -9,7 +9,7 @@ class Room {
   late final String _description;
   late List<Item> _items;
   late List<int> _exits;
-  final image = "assets/images/icon.png";
+  final image = "assets/images/image.png";
 
   int get id => _id;
   String get name => _name;

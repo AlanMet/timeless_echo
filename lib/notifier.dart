@@ -15,6 +15,7 @@ class Controller extends ChangeNotifier {
   List<String> get history => _history;
   final CustomTheme _theme = CustomTheme();
   CustomTheme get theme => _theme;
+  bool isDark = true;
 
   String menu = 'main';
 
