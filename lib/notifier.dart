@@ -18,6 +18,8 @@ class Controller extends ChangeNotifier {
 
   String menu = 'main';
 
+  String get image => game.image;
+
   void setGame(Game game) {
     this.game = game;
   }

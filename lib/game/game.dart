@@ -18,6 +18,7 @@ class Game {
   Atlas map = Atlas();
   Player player = Player();
   Game(this._controller);
+  get image => map.getCurrentRoom().image;
 
   void printscrn(String message) {
     _controller.updateText(message);

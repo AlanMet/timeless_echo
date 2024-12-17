@@ -24,7 +24,32 @@ class _BodyState extends State<Body> {
       padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
       child: Consumer<Controller>(
         builder: (context, controller, child) {
-          return TypingText(text: controller.text, uiController: controller);
+          return Container(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: TypingText(
+                        text: controller.text,
+                        uiController: controller,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Image.asset(
+                    controller.image,
+                    width: 300,
+                    height: 300,
+                  ),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
