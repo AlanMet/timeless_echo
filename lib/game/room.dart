@@ -9,7 +9,7 @@ class Room {
   late final String _description;
   late List<Item> _items;
   late List<int> _exits;
-  final image = "assets/images/image.png";
+  late String image;
 
   int get id => _id;
   String get name => _name;
@@ -19,6 +19,7 @@ class Room {
   Room(this._id, this._name, this._description) {
     _items = [];
     _exits = [-1, -1, -1, -1, -1, -1, -1, -1];
+    image = "assets/images/$_id.png";
   }
 
   Room.withExits(this._id, this._name, this._description, List<int> exits) {
@@ -28,6 +29,7 @@ class Room {
     } else {
       _exits = [-1, -1, -1, -1, -1, -1, -1, -1];
     }
+    image = "assets/images/$_id.png";
   }
 
   void addExit(int room, Direction direction) {

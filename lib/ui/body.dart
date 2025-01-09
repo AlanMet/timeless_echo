@@ -43,8 +43,8 @@ class _BodyState extends State<Body> {
                   flex: 1,
                   child: Image.asset(
                     controller.image,
-                    width: 300,
-                    height: 300,
+                    width: 416,
+                    height: 624,
                   ),
                 ),
               ],

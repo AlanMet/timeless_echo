@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timeless_echo/notifier.dart';
-import 'package:timeless_echo/game/game.dart';
 import 'package:provider/provider.dart';
-import 'package:timeless_echo/game/player.dart';
 
 class HealthWidget extends StatefulWidget {
   const HealthWidget({super.key});

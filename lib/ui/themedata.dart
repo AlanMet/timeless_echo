@@ -13,7 +13,7 @@ class CustomTheme {
     }
   }
 
-  // Updated color scheme with more refined colors, no new logic added
+  // Updated color scheme
   ColorScheme get _colorScheme => _isDark
       ? const ColorScheme.dark(
           primary: Color(0xFF4A148C), // Rich purple, more sophisticated

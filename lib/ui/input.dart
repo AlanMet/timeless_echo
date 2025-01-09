@@ -40,6 +40,38 @@ class _TextInputState extends State<TextInput> {
             hintText: 'Enter command',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: controller
+                    .theme.theme.colorScheme.onSurface, // Default border color
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: controller
+                    .theme.theme.colorScheme.primary, // Focused border color
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: controller.theme.theme.colorScheme
+                    .onSurface, // Border color when enabled
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: controller
+                    .theme.theme.colorScheme.error, // Error state border color
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: controller.theme.theme.colorScheme
+                    .error, // Error state border when focused
+              ),
             ),
             suffixIcon: IconButton(
               icon: const Icon(Icons.send),
@@ -49,7 +81,10 @@ class _TextInputState extends State<TextInput> {
               },
             ),
           ),
-          style: controller.theme.theme.textTheme.bodyMedium,
+          style: TextStyle(
+            color: controller.theme.theme.colorScheme
+                .onSurface, // Text color matches onSurface color
+          ),
         ),
       ),
     );

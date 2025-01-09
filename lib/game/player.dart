@@ -35,7 +35,7 @@ class Player {
           }
           _inventory.removeItem(item.name);
           if (item is Drink) {
-            return "You drank the ${item.name}. Your health is now $_health.";
+            return "You drank from the ${item.name}. Your health is now $_health.";
           } else {
             return "You ate the ${item.name}. Your health is now $_health.";
           }
