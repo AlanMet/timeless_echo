@@ -10,6 +10,8 @@ import 'interactibles.dart';
 import 'player.dart';
 import 'item.dart';
 
+//Classes cannot be split in dart
+//So sorry for the length of this file
 class Game {
   // Reference to the controller
   late final Controller _controller;
@@ -541,7 +543,7 @@ class Game {
             if (!player.crouched) {
               return "You don't see a mirror to crawl through";
             }
-            String output = "You crawl through the mirror";
+            String output = "You crawl through the mirror\n";
             if (map.getCurrentRoom().id == 20) {
               map.setRoom(21);
               return output += map.getCurrentRoom().describe();
@@ -554,8 +556,35 @@ class Game {
         } else {
           return "You can't crawl ${preposition.word} that";
         }
+      case "climb":
+        String output = "";
+        //look in the room for a door with synonym noun
+        //if it exists, climb it
+        //if it doesn't, return "You can't climb that"
+        //if it does, return "You climb the door"
+        var currentRoom = map.getCurrentRoom();
+        if (currentRoom is InteractableRoom) {
+          for (int interactable in currentRoom.interactables) {
+            if (interactable != -1) {
+              var door = map.floatingItems[interactable];
+              if (door.isSynonym(noun.word) && door is Door) {
+                List<int> rooms = door.getRooms();
+                if (rooms[0] == currentRoom.id) {
+                  map.setRoom(rooms[1]);
+                  output += "You climb the ${noun.word}\n";
+                  return output += map.getCurrentRoom().describe();
+                } else if (rooms[1] == currentRoom.id) {
+                  map.setRoom(rooms[0]);
+                  output += "You climb the ${noun.word}\n";
+                  return output += map.getCurrentRoom().describe();
+                }
+              }
+            }
+          }
+        }
+        return "You can't climb that";
       default:
-        return "Sorry I don't know how to ${verb.word} ${preposition.word} ${noun.word}";
+        return "Sorry, I don't know how to '${verb.word}' '${preposition.word}' '${noun.word}'.";
     }
   }
 

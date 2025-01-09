@@ -11,7 +11,7 @@ class Atlas {
   Map<int, Room> _rooms = {};
   //items that get referenced in multiple areas.
   Map<int, dynamic> floatingItems = {};
-  int _currentRoom = 21;
+  int _currentRoom = 0;
 
   get currentRoom => _rooms[_currentRoom];
 

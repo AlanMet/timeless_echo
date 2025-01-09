@@ -79,9 +79,14 @@ class Room {
   String describe() {
     String output = "$_name\n$_description\n";
     if (_items.isNotEmpty) {
-      output += "The room contains: ";
-      for (var item in _items) {
-        output += "${item.name}, ";
+      if (_items.length == 1 && _items[0] is Enemy) {
+        output +=
+            "You see a ${_items[0].name}\n it is a ${_items[0].description}";
+      } else {
+        output += "The room contains: ";
+        for (var item in _items) {
+          output += "${item.name}, ";
+        }
       }
     }
     return output;
