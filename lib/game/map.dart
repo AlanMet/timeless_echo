@@ -11,7 +11,7 @@ class Atlas {
   Map<int, Room> _rooms = {};
   //items that get referenced in multiple areas.
   Map<int, dynamic> floatingItems = {};
-  int _currentRoom = 0;
+  int _currentRoom = 21;
 
   get currentRoom => _rooms[_currentRoom];
 
@@ -282,11 +282,19 @@ class Atlas {
       return 'Invalid direction';
     }
 
-    if (newIndex != -1) {
+    if (newIndex != -1 && newIndex != 99) {
       // if exit
       _currentRoom = newIndex;
       Room room = getRoom(_currentRoom);
+      for (var item in room.items) {
+        if (item is Enemy && room.runtimeType != Tutorial) {
+          item.discovered = true;
+        }
+      }
       return room.describe();
+    } else if (newIndex == 99) {
+      Controller().completedGame();
+      return "Congratulations! You have completed the game";
     } else {
       // if no exit
       Room currentRoom = getRoom(_currentRoom);

@@ -178,6 +178,10 @@ class Game {
       Tutorial tutorial = map.getCurrentRoom() as Tutorial;
       output += tutorial.steps[3];
     }
+
+    if (player.health <= 0) {
+      _controller.gameOver();
+    }
     printscrn(output);
   }
 
@@ -615,7 +619,6 @@ class Game {
         if (sword == null) {
           return "You don't have a ${noun2.word} to cut with";
         }
-
         if (beast is Enemy && sword is Weapon) {
           String output = beast.takeDamage(sword.damage);
           if (beast.health <= 0 && map.getCurrentRoom() is Tutorial) {

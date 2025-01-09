@@ -5,6 +5,8 @@ import 'package:timeless_echo/ui/top_bar.dart';
 import 'package:timeless_echo/ui/input.dart';
 import 'package:provider/provider.dart';
 import 'package:timeless_echo/game/game.dart';
+import 'package:timeless_echo/ui/completed_page.dart';
+import 'package:timeless_echo/ui/game_over.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -48,12 +50,19 @@ class _MainPageState extends State<MainPage> {
           );
         } else {
           // When the game is successfully initialized, show the main UI
+          final Controller notifier = Provider.of<Controller>(context);
+          if (notifier.menu == 'Game Over') {
+            return const Scaffold(
+              body: GameOverPage(),
+            );
+          } else if (notifier.menu == 'Completed') {
+            return const Scaffold(
+              body: CompletedPage(),
+            );
+          }
           return Scaffold(
             body: Container(
-              color: Provider.of<Controller>(context)
-                  .theme
-                  .theme
-                  .scaffoldBackgroundColor,
+              color: notifier.theme.theme.scaffoldBackgroundColor,
               child: const Column(
                 children: [
                   Expanded(flex: 2, child: TopBar()),

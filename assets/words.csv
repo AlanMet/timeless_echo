@@ -50,6 +50,7 @@ unlock,verb
 crouch,verb
 crawl,verb
 cut,verb
+exit,verb
 all,noun
 box,noun
 coins,noun
@@ -79,6 +80,8 @@ book,noun
 mirror,noun
 beast,noun
 water,noun
+ax,noun
+platinum ax,noun
 with,preposition
 at,preposition
 to,preposition

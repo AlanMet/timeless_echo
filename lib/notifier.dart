@@ -61,4 +61,17 @@ class Controller extends ChangeNotifier {
   void gameOver() {
     menu = 'Game Over';
   }
+
+  void completedGame() {
+    menu = 'Completed';
+  }
+
+  void reset() async {
+    game = Game(this);
+    _text = 'Initializing...';
+    await game.loadData();
+    game = game;
+    _history.clear();
+    updateMenu('main');
+  }
 }
